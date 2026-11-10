@@ -23,3 +23,5 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 testpaths = ["testes"]
+pythonpath = ["testes"]
+filterwarnings = ["ignore::DeprecationWarning:fastapi.testclient"]

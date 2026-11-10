@@ -5,7 +5,7 @@ Cada etapa termina com algo que funciona e pode ser visto. Até a etapa 6, tudo 
 | Etapa | Entrega | Pronto quando |
 |---|---|---|
 | 0. Preparação ✅ | Pasta `servidor/` com Python e pytest; pasta `aplicativo/` com TypeScript e Vite | Um teste de exemplo passa e uma página de exemplo abre |
-| 1. Núcleo de cálculo | Curva de sobrevivência e percentis em Python, com tábua provisória (Gompertz) e fatores em configuração | Testes de limites e de perfil médio passam; o caso de teste pessoal (fora do git) dá valores próximos aos do protótipo de cálculo |
+| 1. Núcleo de cálculo ✅ | Curva de sobrevivência e percentis em Python, com tábua provisória (Gompertz) e fatores em configuração | Testes de limites e de perfil médio passam; o caso de teste pessoal (fora do git) dá valores próximos aos do protótipo de cálculo |
 | 2. Banco e API | Tabelas e rotas para memórias, capítulos e intenções, já com dono em cada registro | Dá para criar e listar registros pela documentação automática da API |
 | 3. Linha do tempo no celular | A tela do protótipo, com layout de celular primeiro, lendo da API | Rolagem, granularidade, minimapa e "Hoje" funcionam com dados de exemplo |
 | 4. Registro | Criar e editar memórias (com foto), capítulos e intenções pelo aplicativo | O que é registrado continua lá ao reabrir |

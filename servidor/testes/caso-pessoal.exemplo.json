@@ -1,0 +1,28 @@
+{
+  "_nota": "Modelo com dados FICTÍCIOS. Copie para dados-pessoais/caso-teste.json (na raiz do repositório, fora do git) e troque pelos seus dados e pelos valores esperados.",
+  "perfil": {
+    "nascimento": "1990-03-14",
+    "sexo": "feminino",
+    "data_calculo": "2026-01-01",
+    "altura_m": 1.65,
+    "peso_kg": 70
+  },
+  "respostas": {
+    "tabagismo": "nunca",
+    "alcool": "ate_7",
+    "atividade": "30_a_150",
+    "sono": "menos_de_6"
+  },
+  "esperado": {
+    "hr_total": 1.0,
+    "expectativa_media": 0,
+    "p10": 0,
+    "mediana": 0,
+    "p90": 0
+  },
+  "tolerancia_anos": 0.5,
+  "e_se": {
+    "sono": { "hr_total": 1.0, "ganho_semanas": 0 }
+  },
+  "tolerancia_semanas": 5
+}

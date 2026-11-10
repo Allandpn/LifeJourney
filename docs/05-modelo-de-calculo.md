@@ -79,12 +79,47 @@ Só fatores causais e modificáveis recebem "e se?". Os valores de HR por respos
 
 ## Tudo em configuração
 
-Nenhum número do modelo fica espalhado no código. Um arquivo de configuração guarda:
+Nenhum número do modelo fica espalhado no código. O arquivo [`servidor/dados/fatores.json`](../servidor/dados/fatores.json) guarda:
 
 - os HRs de cada resposta e a fonte;
 - as prevalências brasileiras de cada categoria e a fonte;
 - os parâmetros provisórios: idades da atenuação (75 e 95), redutor dos marcadores (0,5), teto e piso (4,0 e 0,4);
 - o caminho da tábua.
+
+Cada resposta tem um `status` que diz o grau de confiança do número:
+
+| Status | Significado |
+|---|---|
+| `publicado` | Aparece no resumo do artigo |
+| `aproximado` | Derivado, ou precisa ser conferido no texto completo |
+| `provisorio` | Sem fonte direta; serve só para testar o sistema |
+
+A média brasileira de cada fator pode ser dada direto (`valor`) ou calculada das prevalências de cada resposta (`prevalencias`), que é a forma definitiva.
+
+Respostas publicadas em anos de vida, e não em HR (álcool), são escritas como `perda_anos` e convertidas em HR pelo próprio núcleo, usando a tábua ativa.
+
+## Implementação
+
+O núcleo fica em [`servidor/app/nucleo/`](../servidor/app/nucleo/):
+
+| Arquivo | Faz |
+|---|---|
+| `tabua.py` | Tábua provisória de Gompertz-Makeham, leitura do CSV do IBGE e extensão acima de 80 anos |
+| `fatores.py` | Recentragem, bloco de marcadores, teto e piso, faixas de IMC |
+| `sobrevivencia.py` | Atenuação com a idade, curva de sobrevivência, percentis e expectativa |
+| `modelo.py` | Junta tudo; conversão de anos perdidos em HR; "e se?" |
+
+A curva usa passos mensais. Dentro de cada ano de idade, o risco instantâneo é constante (`mu = -ln(1 - q_x)`), o que equivale à fórmula `q'_x = 1 - (1 - q_x)^HR`.
+
+O ganho de cada "e se?" é a diferença na expectativa média, convertida em semanas.
+
+## Situação em novembro de 2026
+
+Com a tábua provisória, o núcleo reproduz o protótipo descrito no briefing: diferenças de até 0,1 ano nos percentis e de 1 semana nos ganhos do "e se?".
+
+A calibração ainda não bate. Aos 50 anos, o perfil com quatro hábitos saudáveis vive 16,4 anos a mais que o perfil sem nenhum, contra 12 (homens) e 14 (mulheres) em Li et al. O perfil sem hábitos bate no teto de 4,0. O teste `test_calibracao.py` está marcado como falha esperada até isso ser resolvido.
+
+Como as médias brasileiras ainda são placeholders, um perfil com alguns fatores de risco pode sair com risco total abaixo de 1,0. Isso é efeito da recentragem sobre médias inventadas, e muda quando as prevalências reais entrarem.
 
 ## Pendências científicas
 

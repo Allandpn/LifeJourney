@@ -6,7 +6,12 @@ O uso principal é no celular. Cada pessoa tem a própria conta, e os dados fica
 
 ## Estado atual
 
-Etapa 0 do [roteiro](docs/07-roteiro.md) concluída: o servidor em Python e o aplicativo em TypeScript existem, se conversam e têm os primeiros testes. Ainda não há funcionalidades do sistema.
+Etapas 0 e 1 do [roteiro](docs/07-roteiro.md) concluídas:
+
+- o servidor em Python e o aplicativo em TypeScript existem, se conversam e têm testes;
+- o núcleo de cálculo (`servidor/app/nucleo/`) estima a faixa de vida e o "e se?", com a tábua provisória e todos os números em [`servidor/dados/fatores.json`](servidor/dados/fatores.json).
+
+Os números ainda são provisórios: as médias brasileiras são placeholders e a calibração está pendente (ver [Modelo de cálculo](docs/05-modelo-de-calculo.md)).
 
 - Protótipo visual: [`prototipo/linha-do-tempo.html`](prototipo/linha-do-tempo.html) (abrir no navegador)
 
@@ -30,6 +35,12 @@ Para rodar os testes:
 
 ```powershell
 .venv\Scripts\pytest
+```
+
+Para ver o cálculo com um perfil fictício:
+
+```powershell
+.venv\Scripts\python -m app.nucleo
 ```
 
 Para ligar o servidor (fica em http://127.0.0.1:8000; a documentação automática da API fica em http://127.0.0.1:8000/docs):
@@ -71,7 +82,9 @@ Com o servidor ligado, a página mostra "Servidor no ar". Para ver no celular, c
 
 | Pasta | Conteúdo |
 |---|---|
-| `servidor/app/` | Código do servidor e, a partir da etapa 1, o núcleo de cálculo |
+| `servidor/app/` | Código do servidor |
+| `servidor/app/nucleo/` | Núcleo de cálculo: tábua, fatores, sobrevivência e "e se?" |
+| `servidor/dados/` | Configuração do modelo (`fatores.json`) e, futuramente, a tábua do IBGE |
 | `servidor/testes/` | Testes do servidor (pytest) |
 | `aplicativo/src/` | Telas e lógica de exibição; testes ficam ao lado do código, em `*.test.ts` |
 | `docs/` | Documentação |
