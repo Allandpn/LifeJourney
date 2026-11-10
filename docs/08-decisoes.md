@@ -28,6 +28,10 @@ Registro curto do que foi decidido e do que falta decidir. Decisões tomadas nã
 | 100% local, sem conta e sem servidor | Servidor próprio com login | Memórias e respostas de saúde passam a ficar em um servidor. Exige hospedagem, HTTPS e cuidado com senhas. A exportação em formato aberto continua |
 | TypeScript em tudo | Python no servidor e no cálculo; TypeScript só na tela | Duas linguagens no projeto |
 
+| Até a etapa 5, um usuário de desenvolvimento, só em modo desenvolvimento | Permite testar a API antes do login; em produção o servidor recusa tudo |
+| Exclusão por marcação (`excluido_em`) | Outros aparelhos ficam sabendo da exclusão |
+| Alembic para mudanças no banco, antes da etapa 7 | Até lá, mudar uma tabela é apagar o banco de desenvolvimento |
+
 ## Propostas, aguardando confirmação
 
 | Proposta | Alternativa |

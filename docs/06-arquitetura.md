@@ -61,6 +61,12 @@ Durante o desenvolvimento, tudo roda no próprio computador. O Pi só entra na e
 
 O Raspberry Pi 4 dá conta com folga: o cálculo é leve e o número de usuários é pequeno.
 
+## Banco de dados
+
+As tabelas são criadas sozinhas quando o servidor liga, se ainda não existirem. Isso não altera tabelas que já existem.
+
+Enquanto o projeto está em desenvolvimento, mudar uma tabela significa apagar o arquivo do banco. Antes de haver dados reais (etapa 7), entra o Alembic, que aplica as mudanças sem perder dados.
+
 ## Sincronização
 
 Na v1 a sincronização é direta: o aplicativo lê e grava no servidor a cada ação.
@@ -91,8 +97,11 @@ LifeJourney/
 ├── servidor/
 │   ├── app/
 │   │   ├── nucleo/          cálculo: tábua, risco combinado, sobrevivência, "e se?"
-│   │   ├── modelos.py       Usuário, Convite, Sessão, Memória, Capítulo, Intenção...
-│   │   ├── api/             contas, convites, memórias, capítulos, intenções, questionário, backup
+│   │   ├── modelos.py       tabelas: Usuário, Memória, Capítulo, Intenção (Convite e Sessão na etapa 5)
+│   │   ├── esquemas.py      formato e validação do que entra e sai da API
+│   │   ├── repositorio.py   acesso aos dados de um usuário (ponto único do isolamento)
+│   │   ├── banco.py         conexão com o SQLite
+│   │   ├── api/             rotas: perfil, memórias, capítulos, intenções (contas, questionário e backup depois)
 │   │   └── config.py        lê o .env
 │   ├── dados/
 │   │   ├── tabua-ibge-2024.csv

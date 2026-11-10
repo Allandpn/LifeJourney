@@ -46,7 +46,7 @@ Um registro por aparelho conectado. Permite listar os aparelhos e desconectar um
 | `data` | data | Obrigatório; não pode ser futura |
 | `texto` | texto | Obrigatório; limite de 280 caracteres (em avaliação) |
 | `foto` | referência a arquivo | Opcional; uma foto por memória na v1. O arquivo fica no servidor, em versão reduzida |
-| `emocao` | texto | Opcional: alegria, calma, orgulho, saudade, tristeza, incerteza |
+| `emocao` | texto | Opcional: `alegria`, `calma`, `orgulho`, `saudade`, `tristeza`, `incerteza` |
 | `intensidade` | 1, 2 ou 3 | Leve, média, forte; padrão 2 |
 | `marcante` | sim/não | Memórias marcantes têm prioridade no nível Ano |
 | `silenciar` | sim/não | Se sim, fica fora de "nesta semana, em outros anos" |
@@ -60,7 +60,7 @@ Um registro por aparelho conectado. Permite listar os aparelhos e desconectar um
 | `nome` | texto | Obrigatório |
 | `inicio` | data | Obrigatório |
 | `fim` | data | Vazio significa "em andamento" |
-| `cor` | nome da paleta | Uma das sete cores de capítulo |
+| `cor` | nome da paleta | `menta`, `azul`, `ambar`, `laranja`, `rosa`, `lavanda` ou `coral` |
 | `principal` | sim/não | Capítulos principais definem a cor da época |
 | `categoria` | texto | Opcional: trabalho, relacionamento, saúde, transição... |
 | `notas` | texto longo | Opcional |
@@ -73,17 +73,38 @@ Capítulos podem se sobrepor. Se dois capítulos principais se sobrepõem, vale 
 |---|---|---|
 | `nome` | texto | Obrigatório |
 | `horizonte` | ver abaixo | Obrigatório |
-| `status` | `ativa`, `pausada`, `virou memória`, `deixada de lado` | Nunca "concluída / não concluída" |
+| `status` | `ativa`, `pausada`, `virou_memoria`, `deixada_de_lado` | Nunca "concluída / não concluída" |
 | `notas` | texto | Opcional |
 | `memoriaId` | id de memória | Preenchido quando a intenção vira memória |
 
 O horizonte tem três formas:
 
-| Forma | Campos | Exemplo |
+| Forma | Como é enviado | Exemplo |
 |---|---|---|
-| Data | `data` | abril de 2027 |
-| Intervalo | `de`, `ate` | entre 2027 e 2028 |
-| Algum dia | nenhum | sem data |
+| Data | `{"tipo": "data", "data": "2027-04-01"}` | abril de 2027 |
+| Intervalo | `{"tipo": "intervalo", "de": "2027-01-01", "ate": "2028-12-31"}` | entre 2027 e 2028 |
+| Algum dia | `{"tipo": "algum_dia"}` | sem data |
+
+## Na API
+
+A implementação está em `servidor/app/modelos.py` (tabelas) e `servidor/app/esquemas.py` (validação). Os nomes de campos na API usam `_` (`veio_de`, `criado_em`).
+
+| Rota | Faz |
+|---|---|
+| `GET` / `PUT /api/perfil` | Lê e grava nascimento e sexo |
+| `GET /api/memorias` | Lista em ordem de data; aceita `?de=` e `?ate=` |
+| `POST /api/memorias` | Cria |
+| `GET` / `PATCH` / `DELETE /api/memorias/{id}` | Lê, altera só os campos enviados, exclui |
+| `/api/capitulos` e `/api/intencoes` | As mesmas cinco operações |
+
+Regras que a API garante:
+
+- o aplicativo não escolhe `id` nem dono: campos desconhecidos são recusados;
+- memória não pode ter data futura, nem texto vazio ou com mais de 280 caracteres;
+- capítulo não pode terminar antes de começar;
+- `veio_de` e `memoria_id` só aceitam memórias do próprio usuário;
+- uma alteração parcial é validada junto com o resto do registro;
+- registro excluído, inexistente ou de outra pessoa respondem igual: "não encontrado" (404).
 
 ## Respostas do questionário
 
