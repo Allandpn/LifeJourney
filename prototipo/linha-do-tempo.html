@@ -1,0 +1,594 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Vida em Semanas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap">
+<style>
+/* Layout: uma linha vertical (passado acima, futuro abaixo) com capítulos como faixas
+   paralelas na linha, memórias alternando de lado, e a vida inteira em semanas como
+   minimapa fixo à direita. */
+:root{
+  --bg:#f5efe6; --surface:#fcf8f2; --fg:#2e2622; --muted:#7b6d63; --line:#cdbfb0;
+  --accent:#b4553a; --accent-fg:#fff8f2;
+  --k-sage:#7f9a74; --k-blue:#6583a0; --k-ochre:#c79a3c; --k-clay:#a47a5b;
+  --k-plum:#8d6485; --k-stone:#77727a; --k-terra:#b4553a;
+  --e-alegria:#c79a3c; --e-calma:#7f9a74; --e-orgulho:#b4553a;
+  --e-saudade:#6583a0; --e-tristeza:#77727a; --e-incerteza:#8d6485;
+  --shade:rgba(46,38,34,.45);
+  --display:'Merriweather',Georgia,'Times New Roman',serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mini-w:112px; --hh:96px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1613; --surface:#272019; --fg:#ece2d6; --muted:#a59585; --line:#4d4037;
+    --accent:#dc7d60; --accent-fg:#1b1613;
+    --k-sage:#93b087; --k-blue:#7f9dba; --k-ochre:#d6ab52; --k-clay:#bb9272;
+    --k-plum:#a67d9e; --k-stone:#96909a; --k-terra:#dc7d60;
+    --e-alegria:#d6ab52; --e-calma:#93b087; --e-orgulho:#dc7d60;
+    --e-saudade:#7f9dba; --e-tristeza:#96909a; --e-incerteza:#a67d9e;
+    --shade:rgba(0,0,0,.6); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1613; --surface:#272019; --fg:#ece2d6; --muted:#a59585; --line:#4d4037;
+  --accent:#dc7d60; --accent-fg:#1b1613;
+  --k-sage:#93b087; --k-blue:#7f9dba; --k-ochre:#d6ab52; --k-clay:#bb9272;
+  --k-plum:#a67d9e; --k-stone:#96909a; --k-terra:#dc7d60;
+  --e-alegria:#d6ab52; --e-calma:#93b087; --e-orgulho:#dc7d60;
+  --e-saudade:#7f9dba; --e-tristeza:#96909a; --e-incerteza:#a67d9e;
+  --shade:rgba(0,0,0,.6); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- cabeçalho ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 8px}
+.top-in{max-width:1100px;margin:0 auto;display:grid;gap:8px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.brand{font-family:var(--display);font-weight:700;font-size:1.05rem;margin-right:auto;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.brand small{font-family:var(--body);font-weight:500;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:2px;background:var(--surface)}
+.seg button{border:0;background:none;padding:5px 13px;border-radius:999px;font-size:.85rem;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:.85rem;font-weight:500}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.ctx{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:.82rem;color:var(--muted);min-height:1.4em}
+.ctx b{color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:6px}
+.chip i{width:9px;height:9px;border-radius:2px;display:block}
+
+/* ---------- linha do tempo ---------- */
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+.tl{max-width:1100px;margin:0 auto;padding-right:calc(var(--mini-w) + 28px)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);--op:1}
+.spine{grid-column:2;grid-row:1 / span 2;position:relative;display:flex;justify-content:center}
+.spine::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:var(--line);opacity:var(--op)}
+.row.dashed .spine::before{background:repeating-linear-gradient(var(--line) 0 5px,transparent 5px 11px)}
+.lanes{display:flex;gap:3px;position:relative}
+.lanes i{width:7px;display:block}
+.node{position:absolute;top:22px;left:50%;translate:-50% 0;border-radius:50%;background:var(--fg);box-shadow:0 0 0 3px var(--bg);width:9px;height:9px}
+.node.n2{width:12px;height:12px}.node.n3{width:16px;height:16px}
+.node.open{background:var(--bg);border:1.5px solid var(--muted);box-shadow:0 0 0 3px var(--bg);width:11px;height:11px}
+.label{grid-column:1;grid-row:1;text-align:right;padding-block:14px}
+.body{grid-column:3;grid-row:1;padding-block:16px 22px;display:grid;gap:18px;justify-items:start;align-content:start}
+.side-l .label{grid-column:3;text-align:left}
+.side-l .body{grid-column:1;justify-items:end}
+.label .big{font-family:var(--display);font-weight:300;font-size:1.9rem;line-height:1.15;display:block;font-variant-numeric:tabular-nums}
+.label .sub{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.g-month .label .big,.g-week .label .big{font-size:1.25rem;font-weight:400}
+
+/* períodos vazios, marcos de capítulo, marcadores */
+.gap .note,.chap .note,.mark .note,.edge .note{grid-column:3;grid-row:1;align-self:center;font-size:.8rem;color:var(--muted);padding-block:6px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-variant-numeric:tabular-nums}
+.gap .add{border:0;background:none;padding:2px 6px;border-radius:6px;color:var(--muted);font-size:.8rem;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.gap .add:hover{color:var(--accent)}
+.chap .note{padding-block:14px 4px;color:var(--fg)}
+.chap .note i{width:11px;height:11px;border-radius:3px;display:block}
+.chap .note strong{font-family:var(--display);font-weight:700;font-size:1rem}
+.eyebrow{font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.mark .note{font-style:italic;padding-block:12px}
+.edge .note{padding-block:26px;font-family:var(--display);font-weight:300;font-style:italic;font-size:.95rem}
+
+/* memórias */
+.card{border:0;background:none;padding:0;text-align:left;display:grid;gap:8px;max-width:min(100%,var(--pw,400px));border-radius:10px;scroll-margin-top:calc(var(--hh) + 60px)}
+.card .ph{display:block;width:100%;aspect-ratio:4/3;border-radius:10px}
+.card .tx{display:block;font-size:.95rem;text-wrap:pretty}
+.card.i2 .tx{font-size:1.05rem}
+.card.i3 .tx{font-family:var(--display);font-weight:300;font-size:1.3rem;line-height:1.4}
+.card.i1{--pw:240px}.card.i2{--pw:320px}.card.i3{--pw:420px}
+.card:not(.has-ph){--pw:400px}
+.card .meta,.intent .meta{font-size:.76rem;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.card .meta i{width:8px;height:8px;border-radius:50%;display:block}
+.card .from{font-size:.76rem;color:var(--muted);font-style:italic}
+.card:hover .tx{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.card.flash{animation:flash 1.8s ease-out}
+@keyframes flash{0%,40%{box-shadow:0 0 0 10px var(--surface),0 0 0 12px var(--accent)}100%{box-shadow:0 0 0 10px transparent,0 0 0 12px transparent}}
+.g-year .card .tx{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.g-year .card.i1{--pw:180px}.g-year .card.i2{--pw:230px}.g-year .card.i3{--pw:300px}
+.g-year .card:not(.has-ph){--pw:340px}
+.g-year .card.i3 .tx{font-size:1.1rem}
+.g-week .card.i1{--pw:300px}.g-week .card.i2{--pw:380px}.g-week .card.i3{--pw:460px}
+.more{border:0;background:none;padding:0;font-size:.8rem;color:var(--accent);font-weight:500}
+
+/* intenções: contorno tracejado, nunca preenchidas */
+.intent{border:1.5px dashed var(--muted);border-radius:12px;padding:10px 14px;display:grid;gap:3px;max-width:min(100%,340px)}
+.intent .tx{font-family:var(--display);font-weight:400;font-size:.98rem}
+.someday{display:flex;flex-wrap:wrap;gap:10px}
+.side-l .someday{justify-content:flex-end}
+
+/* hoje */
+.today .label .big{color:var(--accent);font-weight:700}
+.today .node{background:var(--accent);width:14px;height:14px;box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--accent)}
+.now-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:grid;gap:12px;max-width:440px;width:100%}
+.now-card h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.15rem;text-wrap:balance}
+.now-card p{margin:0;font-size:.85rem;color:var(--muted)}
+.echo{display:grid;gap:8px;padding:0;margin:0;list-style:none}
+.echo button{border:0;background:none;padding:0;text-align:left;font-size:.9rem}
+.echo button span{color:var(--muted);font-size:.76rem;display:block}
+.echo button:hover{text-decoration:underline}
+.future .label .big{color:var(--muted)}
+
+/* ---------- minimapa ---------- */
+.mini{position:fixed;z-index:8;right:max(14px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + var(--hh) + 14px);
+  bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:var(--mini-w);touch-action:none;cursor:pointer}
+.mini canvas{width:100%;height:100%;display:block}
+.mini-view{position:absolute;left:-4px;right:-4px;border:1.5px solid var(--fg);border-radius:4px;pointer-events:none;min-height:8px}
+
+/* ---------- diálogos ---------- */
+dialog{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:16px;padding:0;width:min(520px,calc(100% - 32px));max-height:calc(100% - 48px)}
+dialog::backdrop{background:var(--shade)}
+.dlg{padding:22px;display:grid;gap:14px}
+.dlg .ph{aspect-ratio:16/10;border-radius:10px;display:block}
+.dlg h3{margin:0;font-size:.8rem;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.dlg .full{font-family:var(--display);font-weight:300;font-size:1.2rem;line-height:1.5;margin:0;text-wrap:pretty}
+.dlg .links{display:grid;gap:8px}
+.dlg .links button{border:1px solid var(--line);background:none;border-radius:10px;padding:8px 12px;text-align:left;font-size:.86rem}
+.dlg .links button span{display:block;font-size:.72rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.dlg label{display:grid;gap:5px;font-size:.8rem;color:var(--muted)}
+.dlg label.inline{display:flex;align-items:center;gap:8px}
+.dlg input[type=date],.dlg select,.dlg textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.dlg textarea{min-height:96px;resize:vertical}
+.dlg .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.dlg .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+
+@media (max-width:760px){
+  :root{--mini-w:34px}
+  .tl{padding-right:calc(var(--mini-w) + 14px)}
+  .row{grid-template-columns:38px minmax(0,1fr)}
+  .spine{grid-column:1}
+  .lanes{gap:2px}.lanes i{width:5px}
+  .label,.side-l .label{grid-column:2;grid-row:1;text-align:left;padding-block:14px 0}
+  .body,.side-l .body{grid-column:2;grid-row:2;justify-items:start;padding-block:10px 22px}
+  .gap .note,.chap .note,.mark .note,.edge .note{grid-column:2}
+  .side-l .someday{justify-content:flex-start}
+  .label .big{font-size:1.5rem}
+  .mini{right:max(8px,env(safe-area-inset-right,0px))}
+  .brand small{display:none}
+}
+@media (prefers-reduced-motion:reduce){.card.flash{animation:none}}
+</style>
+
+<header class="top" id="top">
+  <div class="top-in">
+    <div class="bar">
+      <div class="brand">Vida em Semanas <small>protótipo · dados fictícios</small></div>
+      <div class="seg" role="group" aria-label="Granularidade">
+        <button type="button" data-g="year" aria-pressed="true">Ano</button>
+        <button type="button" data-g="month" aria-pressed="false">Mês</button>
+        <button type="button" data-g="week" aria-pressed="false">Semana</button>
+      </div>
+      <button type="button" class="btn" id="btn-today">Hoje</button>
+      <button type="button" class="btn primary" id="btn-add">+ Memória</button>
+    </div>
+    <div class="ctx" id="ctx" aria-live="off"></div>
+  </div>
+</header>
+
+<div class="wrap"><main class="tl g-year" id="tl"></main></div>
+
+<aside class="mini" id="mini" aria-label="A vida inteira em semanas. Toque para ir a um período.">
+  <canvas id="mini-c"></canvas>
+  <div class="mini-view" id="mini-v"></div>
+</aside>
+
+<dialog id="dlg-mem"><div class="dlg" id="dlg-mem-in"></div></dialog>
+
+<dialog id="dlg-add">
+  <form class="dlg" id="form-add">
+    <h3>Nova memória</h3>
+    <label>O que aconteceu?
+      <textarea id="f-text" maxlength="280" required placeholder="Uma ou duas frases bastam."></textarea>
+    </label>
+    <div class="two">
+      <label>Quando <input type="date" id="f-date" required></label>
+      <label>Emoção
+        <select id="f-emo">
+          <option value="alegria">alegria</option><option value="calma">calma</option>
+          <option value="orgulho">orgulho</option><option value="saudade">saudade</option>
+          <option value="tristeza">tristeza</option><option value="incerteza">incerteza</option>
+        </select>
+      </label>
+      <label>Intensidade
+        <select id="f-int"><option value="1">leve</option><option value="2" selected>média</option><option value="3">forte</option></select>
+      </label>
+    </div>
+    <div class="acts">
+      <button type="button" class="btn" id="f-cancel">Cancelar</button>
+      <button type="submit" class="btn primary">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+"use strict";
+var DAY=864e5, WEEK=7*DAY, YEAR=365.2425*DAY;
+var BIRTH=new Date(1990,2,14).getTime();
+var T0=new Date(); T0.setHours(0,0,0,0); var NOW=T0.getTime();
+var EST={p10:68,p50:85,p90:95,end:98};           // estimativa ilustrativa (anos de idade)
+var END=BIRTH+EST.end*YEAR;
+function d(y,m,dd){return new Date(y,m-1,dd).getTime();}
+function rel(years,days){var x=new Date(NOW);x.setFullYear(x.getFullYear()+years);return x.getTime()+(days||0)*DAY;}
+function relM(months){var x=new Date(NOW);x.setMonth(x.getMonth()+months);return x.getTime();}
+
+var chapters=[
+ {id:'c1',name:'Infância em Olinda',s:BIRTH,e:d(2001,1,31),color:'--k-sage'},
+ {id:'c2',name:'Curitiba e a escola',s:d(2001,2,1),e:d(2007,12,20),color:'--k-blue'},
+ {id:'c3',name:'Faculdade de Arquitetura',s:d(2008,3,1),e:d(2013,12,15),color:'--k-ochre'},
+ {id:'c4',name:'Primeiro escritório',s:d(2014,2,10),e:d(2018,6,30),color:'--k-clay'},
+ {id:'c5',name:'Com o Davi',s:d(2015,8,22),e:d(2021,4,10),color:'--k-plum'},
+ {id:'c6',name:'O ano sem meu pai',s:d(2017,9,19),e:d(2018,10,30),color:'--k-stone'},
+ {id:'c7',name:'Estúdio próprio em São Paulo',s:d(2018,11,5),e:null,color:'--k-terra'},
+ {id:'c8',name:'Aprendendo a correr',s:d(2023,1,15),e:null,color:'--k-sage'}
+];
+var memories=[
+ {id:'m1',t:d(1994,12,24),x:'Primeiro Natal de que me lembro. A casa da vó Zefa cheia, e eu dormindo debaixo da mesa.',emo:'alegria',int:2,ph:1},
+ {id:'m2',t:d(1996,2,18),x:'Carnaval em Olinda no ombro do meu pai. Os bonecos gigantes me davam medo e eu não queria ir embora.',emo:'alegria',int:3,ph:1,star:1},
+ {id:'m3',t:d(1998,7,10),x:'Aprendi a andar de bicicleta na ladeira. Ralei os dois joelhos.',emo:'orgulho',int:1},
+ {id:'m4',t:d(2001,2,5),x:'Mudança para Curitiba. Chorei o voo inteiro e nunca tinha sentido tanto frio.',emo:'saudade',int:3,star:1},
+ {id:'m5',t:d(2003,9,12),x:'A professora Lúcia pendurou meu desenho da Ópera de Arame no corredor da escola.',emo:'orgulho',int:2,ph:1},
+ {id:'m6',t:d(2005,6,25),x:'Primeira viagem sem meus pais: Ilha do Mel com a turma.',emo:'alegria',int:2,ph:1},
+ {id:'m7',t:d(2007,12,14),x:'Passei no vestibular de Arquitetura. Meu pai buzinou a rua inteira.',emo:'orgulho',int:3,star:1,from:'m5'},
+ {id:'m8',t:d(2008,3,3),x:'Primeiro dia de faculdade. Não entendi nada na aula de estruturas.',emo:'incerteza',int:1},
+ {id:'m9',t:d(2010,7,20),x:'Inverno em Lisboa. Desenhei azulejos por três semanas.',emo:'alegria',int:3,ph:1,star:1},
+ {id:'m10',t:d(2012,5,8),x:'Reprovei em Projeto VI. Pensei em largar o curso.',emo:'tristeza',int:2},
+ {id:'m11',t:d(2013,12,13),x:'Formatura. A banca elogiou justamente o projeto que refiz depois de reprovar.',emo:'orgulho',int:3,ph:1,star:1,from:'m10'},
+ {id:'m12',t:d(2014,2,10),x:'Primeiro emprego, no escritório da Renata. Salário pequeno, prancheta grande.',emo:'incerteza',int:1},
+ {id:'m13',t:d(2015,8,22),x:'Conheci o Davi num show na Pedreira.',emo:'alegria',int:2,ph:1},
+ {id:'m26',t:rel(-11,-2),x:'Entreguei a maquete da padaria às três da manhã.',emo:'orgulho',int:1},
+ {id:'m14',t:d(2016,10,2),x:'Primeira obra entregue: a padaria da rua Itupava.',emo:'orgulho',int:2,ph:1,from:'m26'},
+ {id:'m15',t:d(2017,9,19),x:'Meu pai morreu. Escrevo isso só para que a data fique guardada.',emo:'tristeza',int:3,star:1},
+ {id:'m16',t:d(2018,3,11),x:'Voltei a Olinda sozinha e subi a ladeira da Misericórdia.',emo:'saudade',int:2,ph:1,from:'m15'},
+ {id:'m17',t:d(2018,6,29),x:'Pedi demissão. Não sabia o que vinha depois.',emo:'incerteza',int:2,from:'m15'},
+ {id:'m18',t:d(2018,11,5),x:'Abri o estúdio numa sala de 20 m² na Vila Buarque.',emo:'orgulho',int:3,ph:1,star:1,from:'m17'},
+ {id:'m19',t:d(2020,3,17),x:'Primeira semana de quarentena. Desenhando na mesa da cozinha.',emo:'incerteza',int:2},
+ {id:'m20',t:d(2021,4,10),x:'Davi e eu nos separamos. Foi triste e foi certo.',emo:'tristeza',int:3},
+ {id:'m25',t:rel(-5,1),x:'Tarde inteira na varanda lendo, sem olhar o celular.',emo:'calma',int:1},
+ {id:'m21',t:d(2022,8,27),x:'A biblioteca comunitária de Parelheiros foi inaugurada.',emo:'orgulho',int:3,ph:1,star:1,from:'m18'},
+ {id:'m22',t:d(2023,1,15),x:'Corri 2 km sem parar pela primeira vez.',emo:'orgulho',int:1},
+ {id:'m23',t:d(2024,6,2),x:'Primeira meia maratona, em 2h31. Chorei no quilômetro 19.',emo:'alegria',int:3,ph:1,from:'m22'},
+ {id:'m24',t:d(2025,12,25),x:'Natal com minha mãe em São Paulo. Fizemos o bolo de rolo da vó Zefa.',emo:'calma',int:2,ph:1},
+ {id:'m28',t:NOW-110*DAY,x:'Comecei a aula de cerâmica aos sábados.',emo:'calma',int:1},
+ {id:'m27',t:NOW-10*DAY,x:'Almoço longo com a Bia, que eu não via há dois anos.',emo:'alegria',int:2}
+];
+var intentions=[
+ {id:'i1',name:'Viagem ao Japão na primavera',t:relM(5),status:'ativa'},
+ {id:'i2',name:'Correr uma maratona inteira',from:relM(12),to:relM(24),status:'ativa'},
+ {id:'i3',name:'Projetar uma escola pública',from:relM(36),to:relM(60),status:'ativa'},
+ {id:'i4',name:'Morar um ano perto do mar',from:relM(72),to:relM(120),status:'pausada'},
+ {id:'i5',name:'Aprender violoncelo',status:'algum dia'},
+ {id:'i6',name:'Levar minha mãe a Lisboa',status:'algum dia'},
+ {id:'i7',name:'Escrever sobre o meu pai',status:'algum dia'}
+];
+intentions.forEach(function(i){ if(i.from) i.t=(i.from+i.to)/2; });
+
+// faixas paralelas para capítulos que se sobrepõem
+var laneEnd=[];
+chapters.forEach(function(c){
+  var end=c.e==null?NOW+DAY:c.e, l=0;
+  while(laneEnd[l]!==undefined && laneEnd[l]>c.s) l++;
+  laneEnd[l]=end; c.lane=l; c.end=end;
+});
+var LANES=laneEnd.length;
+
+var $=function(s){return document.querySelector(s);};
+var tl=$('#tl'), gran='year', rows=[], nextId=100;
+var MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+var MESL=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function age(t){return Math.floor((t-BIRTH)/YEAR);}
+function fmt(t){var x=new Date(t);return x.getDate()+' '+MES[x.getMonth()]+' '+x.getFullYear();}
+function weekNo(t){return (Math.floor((t-BIRTH)/WEEK)+1).toLocaleString('pt-BR');}
+function yr(t){return new Date(t).getFullYear();}
+function chAt(s,e){return chapters.filter(function(c){return c.s<e && c.end>s;});}
+function byId(id){return memories.filter(function(m){return m.id===id;})[0];}
+function photo(m){var n=parseInt(m.id.slice(1),10), h1=(n*47)%60+10, h2=(h1+150+(n*29)%60)%360;
+  return 'background:radial-gradient(circle at '+(25+(n*17)%50)+'% 32%,hsl('+h1+' 85% 86%) 0 7%,transparent 7.6%),linear-gradient(180deg,hsl('+h2+' 38% 70%),hsl('+h1+' 62% 72%) 58%,hsl('+h1+' 34% 36%) 58.4%,hsl('+h1+' 30% 24%))';}
+
+/* ---------- períodos conforme a granularidade ---------- */
+function periods(g){
+  var out=[],t,n,x;
+  if(g==='week'){ for(t=BIRTH;t<END;t+=WEEK) out.push({s:t,e:t+WEEK}); }
+  else{
+    x=new Date(BIRTH); x=g==='year'?new Date(x.getFullYear(),0,1):new Date(x.getFullYear(),x.getMonth(),1);
+    while(x.getTime()<END){
+      n=g==='year'?new Date(x.getFullYear()+1,0,1):new Date(x.getFullYear(),x.getMonth()+1,1);
+      out.push({s:Math.max(x.getTime(),BIRTH),e:n.getTime()}); x=n;
+    }
+  }
+  // o dia de hoje vira um período próprio
+  var res=[];
+  out.forEach(function(p){
+    if(p.s<=NOW && NOW<p.e){
+      if(p.s<NOW) res.push({s:p.s,e:NOW,full:p});
+      res.push({s:NOW,e:NOW+DAY,today:true});
+      if(NOW+DAY<p.e) res.push({s:NOW+DAY,e:p.e,full:p});
+    } else res.push(p);
+  });
+  return res;
+}
+function opAt(t){var a=(t-BIRTH)/YEAR; if(a<EST.p10) return 1; if(a>EST.p90) return .28; return 1-.6*(a-EST.p10)/(EST.p90-EST.p10);}
+
+function build(g){
+  var items=memories.map(function(m){return {k:'m',t:m.t,o:m};})
+    .concat(intentions.filter(function(i){return i.t;}).map(function(i){return {k:'i',t:i.t,o:i};}))
+    .sort(function(a,b){return a.t-b.t;});
+  var lastIntent=Math.max.apply(null,intentions.filter(function(i){return i.t;}).map(function(i){return i.t;}));
+  var marks=[
+    {t:BIRTH+EST.p10*YEAR,x:EST.p10+' anos · daqui em diante a estimativa vira uma faixa'},
+    {t:BIRTH+EST.p50*YEAR,x:EST.p50+' anos · meio da faixa estimada'},
+    {t:BIRTH+EST.p90*YEAR,x:EST.p90+' anos · além daqui continua possível'}];
+  var out=[{type:'edge',s:BIRTH,e:BIRTH,ch:[],x:'14 de março de 1990 · a linha começa aqui'}];
+  var ps=periods(g), ix=0, gap=null, seen={}, seg=0, side=0;
+  ps.forEach(function(p){
+    p.items=[]; while(ix<items.length && items[ix].t<p.e){ p.items.push(items[ix]); ix++; }
+    var ch=chAt(p.s,p.e), fut=p.s>NOW;
+    var near=p.today || (g==='week' && !fut && NOW-p.e<3*WEEK);
+    var sg=marks.filter(function(m){return m.t<=p.s;}).length;
+    while(seg<sg){ out.push({type:'mark',s:p.s,e:p.s,ch:[],x:marks[seg].x,fut:true}); seg++; gap=null; }
+    ch.forEach(function(c){ if(!seen[c.id]){ seen[c.id]=1; out.push({type:'chap',s:p.s,e:p.s,ch:ch,c:c}); gap=null; } });
+    var bucket=fut?'f'+Math.floor(yr(p.s)/5)+'-'+sg:(g==='year'?'':yr(p.s));
+    var key=ch.map(function(c){return c.id;}).join()+'|'+bucket;
+    if(!p.items.length && !near){
+      if(gap && gap.key===key){ gap.e=p.e; }
+      else { gap={type:'gap',s:p.s,e:p.e,key:key,ch:ch,fut:fut}; out.push(gap); }
+    } else {
+      gap=null;
+      out.push({type:p.today?'today':'period',s:p.s,e:p.e,ch:ch,fut:fut,items:p.items,full:p.full,side:(side++%2)?'l':'r'});
+      if(lastIntent>=p.s && lastIntent<p.e){ out.push({type:'someday',s:p.e,e:p.e,ch:[],fut:true,side:(side++%2)?'l':'r'}); }
+    }
+  });
+  out.push({type:'edge',s:END,e:END,ch:[],fut:true,x:'A linha segue além daqui, só mais tênue.'});
+  return out;
+}
+
+/* ---------- desenho das linhas ---------- */
+function spine(r,node){
+  var h='<div class="spine">';
+  if(r.ch.length){ h+='<div class="lanes">'; for(var l=0;l<LANES;l++){ var c=r.ch.filter(function(x){return x.lane===l;})[0];
+      h+='<i'+(c?' style="background:var('+c.color+')"':'')+'></i>'; } h+='</div>'; }
+  return h+(node||'')+'</div>';
+}
+function rangeLabel(r){
+  var a=new Date(r.s), b=new Date(r.e-(gran==='week'?WEEK:DAY)), ya=a.getFullYear(), yb=Math.max(ya,b.getFullYear());
+  if(r.fut || gran==='year') return ya===yb?String(ya):ya+'–'+yb;
+  if(a.getMonth()===b.getMonth()) return MES[a.getMonth()]+' '+ya;
+  return MES[a.getMonth()]+'–'+MES[b.getMonth()]+' '+ya;
+}
+function periodLabel(r){
+  var s=r.full?r.full.s:r.s, e=r.full?r.full.e:r.e, a=new Date(s), b=new Date(e-DAY);
+  if(gran==='year') return ['<span class="big">'+a.getFullYear()+'</span>', (a.getFullYear()-1990)+' anos'];
+  if(gran==='month') return ['<span class="big">'+MESL[a.getMonth()]+'</span>', a.getFullYear()+' · '+age(r.s)+' anos'];
+  var txt=a.getMonth()===b.getMonth()? a.getDate()+'–'+b.getDate()+' '+MES[a.getMonth()] : a.getDate()+' '+MES[a.getMonth()]+' – '+b.getDate()+' '+MES[b.getMonth()];
+  return ['<span class="big">'+txt+'</span>', a.getFullYear()+' · semana '+weekNo(s)];
+}
+function memCard(m){
+  var from=m.from&&gran!=='year'?byId(m.from):null;
+  return '<button type="button" class="card i'+m.int+(m.ph?' has-ph':'')+'" data-id="'+m.id+'">'+
+    (m.ph?'<span class="ph" style="'+photo(m)+'"></span>':'')+
+    '<span class="tx">'+esc(m.x)+'</span>'+
+    (from?'<span class="from">depois de: '+esc(from.x.slice(0,46))+'…</span>':'')+
+    '<span class="meta"><i style="background:var(--e-'+m.emo+')"></i>'+fmt(m.t)+' · '+m.emo+'</span></button>';
+}
+function intentCard(i){
+  var when=i.from?'entre '+yr(i.from)+' e '+yr(i.to):(i.t?MES[new Date(i.t).getMonth()]+' de '+yr(i.t):'sem data');
+  return '<div class="intent"><span class="tx">'+esc(i.name)+'</span><span class="meta">'+when+' · '+i.status+'</span></div>';
+}
+function rowHTML(r,i){
+  var cls='row '+r.type+(r.fut?' future':'')+(r.side?' side-'+r.side:'')+(r.fut&&(r.s-BIRTH)/YEAR>=EST.p10?' dashed':'');
+  var st=r.fut?' style="--op:'+opAt((r.s+r.e)/2).toFixed(2)+'"':'', h='<section class="'+cls+'" data-i="'+i+'"'+st+'>';
+  if(r.type==='edge'||r.type==='mark'){ return h+spine(r)+'<div class="note">'+esc(r.x)+'</div></section>'; }
+  if(r.type==='chap'){
+    return h+spine(r)+'<div class="note"><span class="eyebrow">começa</span><i style="background:var('+r.c.color+')"></i><strong>'+esc(r.c.name)+
+      '</strong><span>'+yr(r.c.s)+(r.c.e?'–'+yr(r.c.e):' · em andamento')+'</span></div></section>';
+  }
+  if(r.type==='gap'){
+    var mo=(r.e-r.s)/(YEAR/12), ht=Math.round(Math.min(92,26+9*Math.sqrt(mo)));
+    var a0=age(r.s), a1=age(r.e-DAY);
+    var txt=r.fut? rangeLabel(r)+' · '+(a0===a1?a0:a0+' a '+a1)+' anos' : rangeLabel(r)+' · nada registrado ainda';
+    return h+spine(r)+'<div class="note" style="min-height:'+ht+'px"><span>'+txt+'</span>'+
+      (r.fut?'':'<button type="button" class="add" data-add="'+Math.round((r.s+r.e)/2)+'">lembrar de algo</button>')+'</div></section>';
+  }
+  if(r.type==='someday'){
+    return h+spine(r,'<span class="node open"></span>')+'<header class="label"><span class="big">algum dia</span><span class="sub">sem data, sem pressa</span></header>'+
+      '<div class="body"><div class="someday">'+intentions.filter(function(x){return !x.t;}).map(intentCard).join('')+'</div></div></section>';
+  }
+  if(r.type==='today'){
+    var td=new Date(NOW), doy=function(t){var x=new Date(t);return x.getMonth()*31+x.getDate();};
+    var echo=memories.filter(function(m){return !m.mute && yr(m.t)!==td.getFullYear() && Math.abs(doy(m.t)-doy(NOW))<=4;});
+    var b='<div class="now-card"><h2>Semana '+weekNo(NOW)+' da sua vida</h2><p>'+age(NOW)+' anos · '+
+      r.ch.map(function(c){return esc(c.name);}).join(' · ')+'</p>';
+    if(echo.length){ b+='<span class="eyebrow">Nesta semana, em outros anos</span><ul class="echo">'+echo.map(function(m){
+      return '<li><button type="button" data-go="'+m.id+'">'+esc(m.x)+'<span>'+yr(m.t)+' · há '+(td.getFullYear()-yr(m.t))+' anos</span></button></li>';}).join('')+'</ul>'; }
+    b+='<div><button type="button" class="btn" data-add="'+NOW+'">Registrar algo de hoje</button></div></div>';
+    b+=r.items.map(function(it){return memCard(it.o);}).join('');
+    return h+spine(r,'<span class="node"></span>')+'<header class="label"><span class="big">Hoje</span><span class="sub">'+
+      td.getDate()+' de '+MESL[td.getMonth()]+' de '+td.getFullYear()+'</span></header><div class="body">'+b+'</div></section>';
+  }
+  // período com conteúdo
+  var lab=periodLabel(r), mems=r.items.filter(function(x){return x.k==='m';}), ints=r.items.filter(function(x){return x.k==='i';});
+  var shown=mems, extra=0;
+  if(gran==='year' && mems.length>3){
+    shown=mems.slice().sort(function(a,b){return (b.o.star||0)-(a.o.star||0)||b.o.int-a.o.int;}).slice(0,3).sort(function(a,b){return a.t-b.t;});
+    extra=mems.length-3;
+  }
+  var mx=mems.reduce(function(a,x){return Math.max(a,x.o.int);},1);
+  var body=shown.map(function(x){return memCard(x.o);}).join('')+
+    (extra?'<button type="button" class="more" data-zoom="'+r.s+'">+ '+extra+(extra>1?' memórias':' memória')+' neste ano</button>':'')+
+    ints.map(function(x){return intentCard(x.o);}).join('');
+  if(!r.items.length) body='<button type="button" class="more" data-add="'+r.s+'">registrar algo desta semana</button>';
+  var node=mems.length?'<span class="node n'+mx+'"></span>':'<span class="node open"></span>';
+  return h+spine(r,node)+'<header class="label">'+lab[0]+'<span class="sub">'+lab[1]+'</span></header><div class="body">'+body+'</div></section>';
+}
+
+function render(){
+  rows=build(gran);
+  tl.className='tl g-'+gran;
+  tl.innerHTML=rows.map(rowHTML).join('');
+  measure(); drawMini(); onScroll();
+}
+function measure(){
+  var els=tl.children, base=tl.getBoundingClientRect().top+window.scrollY;
+  for(var i=0;i<els.length;i++){ rows[i].el=els[i]; rows[i].top=base+els[i].offsetTop-tl.offsetTop+0; rows[i].h=els[i].offsetHeight; }
+  // offsetTop é relativo ao offsetParent; recalcula com getBoundingClientRect para evitar depender disso
+  for(i=0;i<els.length;i++){ rows[i].top=els[i].getBoundingClientRect().top+window.scrollY; }
+  document.documentElement.style.setProperty('--hh',$('#top').offsetHeight+'px');
+}
+function dateAtY(y){
+  var lo=0,hi=rows.length-1;
+  while(lo<hi){ var mid=(lo+hi+1)>>1; if(rows[mid].top<=y) lo=mid; else hi=mid-1; }
+  var r=rows[lo]; if(!r) return NOW;
+  var f=Math.min(1,Math.max(0,(y-r.top)/(r.h||1)));
+  return r.s+f*(r.e-r.s);
+}
+function yAtDate(t){
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; if(r.e>r.s && t<r.e){ return r.top+Math.max(0,(t-r.s)/(r.e-r.s))*r.h; } }
+  return rows[rows.length-1].top;
+}
+var smooth=!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function scrollToDate(t,anim,frac){
+  window.scrollTo({top:Math.max(0,yAtDate(t)-window.innerHeight*(frac||.4)),behavior:anim&&smooth?'smooth':'auto'});
+}
+function goToday(anim){ scrollToDate(NOW,anim,.3); }
+
+/* ---------- contexto fixo e minimapa ---------- */
+var ctx=$('#ctx'), mini=$('#mini'), miniC=$('#mini-c'), miniV=$('#mini-v'), ticking=false;
+function onScroll(){
+  ticking=false; if(!rows.length) return;
+  var hh=$('#top').offsetHeight, y=window.scrollY;
+  var t=dateAtY(y+hh+70), a=age(t), fut=t>NOW+DAY;
+  var ch=fut?[]:chAt(t,t+1);
+  ctx.innerHTML='<b>'+yr(t)+' · '+a+' anos</b>'+(fut?'<span>futuro em aberto</span>':'')+
+    ch.map(function(c){return '<span class="chip"><i style="background:var('+c.color+')"></i>'+esc(c.name)+'</span>';}).join('');
+  var H=mini.clientHeight, t1=dateAtY(y+hh), t2=dateAtY(y+window.innerHeight);
+  var y1=(t1-BIRTH)/(END-BIRTH)*H, y2=(t2-BIRTH)/(END-BIRTH)*H;
+  miniV.style.top=y1+'px'; miniV.style.height=Math.max(8,y2-y1)+'px';
+}
+window.addEventListener('scroll',function(){ if(!ticking){ ticking=true; requestAnimationFrame(onScroll); } },{passive:true});
+
+function drawMini(){
+  var r=miniC.getBoundingClientRect(), dpr=window.devicePixelRatio||1; if(!r.width||!r.height) return;
+  miniC.width=Math.round(r.width*dpr); miniC.height=Math.round(r.height*dpr);
+  var g=miniC.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,r.width,r.height);
+  var css=getComputedStyle(document.documentElement), v=function(n){return css.getPropertyValue(n).trim();};
+  var N=EST.end, cw=r.width/52, rh=r.height/N, memW={}, intW={};
+  memories.forEach(function(m){memW[Math.floor((m.t-BIRTH)/YEAR*52)]=1;});
+  intentions.forEach(function(i){ if(i.t) intW[Math.floor((i.t-BIRTH)/YEAR*52)]=1; });
+  var nowW=Math.floor((NOW-BIRTH)/YEAR*52), w=Math.max(cw-.5,.8), hgt=Math.max(rh-1,1);
+  for(var row=0;row<N;row++) for(var col=0;col<52;col++){
+    var k=row*52+col, t=BIRTH+k/52*YEAR;
+    if(k<=nowW){
+      var cs=chAt(t,t+1), c=cs[cs.length-1];
+      if(memW[k]){ g.globalAlpha=1; g.fillStyle=v('--fg'); }
+      else if(c){ g.globalAlpha=.85; g.fillStyle=v(c.color); }
+      else { g.globalAlpha=.7; g.fillStyle=v('--line'); }
+    } else if(intW[k]){ g.globalAlpha=1; g.fillStyle=v('--accent'); }
+    else { g.globalAlpha=.55*opAt(t)*(row>=EST.p90?.5:1); g.fillStyle=v('--muted'); }
+    g.fillRect(col*cw,row*rh,w,hgt);
+  }
+  g.globalAlpha=1; g.fillStyle=v('--accent');
+  g.fillRect((nowW%52)*cw-1,Math.floor(nowW/52)*rh-1,w+2,hgt+2);
+}
+function miniJump(ev){
+  var r=mini.getBoundingClientRect(), f=Math.min(1,Math.max(0,(ev.clientY-r.top)/r.height));
+  scrollToDate(BIRTH+f*(END-BIRTH),false,.45);
+}
+mini.addEventListener('pointerdown',function(ev){ mini.setPointerCapture(ev.pointerId); miniJump(ev); });
+mini.addEventListener('pointermove',function(ev){ if(ev.buttons||ev.pointerType==='touch') miniJump(ev); });
+
+/* ---------- interações ---------- */
+function setGran(g,anchor){
+  var t=anchor||dateAtY(window.scrollY+window.innerHeight*.4);
+  gran=g;
+  document.querySelectorAll('.seg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.g===g));});
+  render(); scrollToDate(t,false);
+}
+document.querySelector('.seg').addEventListener('click',function(ev){ var b=ev.target.closest('button'); if(b) setGran(b.dataset.g); });
+$('#btn-today').addEventListener('click',function(){ goToday(true); });
+
+function goTo(id){
+  dlgMem.close();
+  var el=tl.querySelector('.card[data-id="'+id+'"]');
+  if(!el){ setGran('month',byId(id).t); el=tl.querySelector('.card[data-id="'+id+'"]'); }
+  if(!el) return;
+  el.scrollIntoView({block:'center',behavior:smooth?'smooth':'auto'});
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+var dlgMem=$('#dlg-mem'), dlgAdd=$('#dlg-add');
+function openMem(id){
+  var m=byId(id); if(!m) return;
+  var from=m.from?byId(m.from):null, to=memories.filter(function(x){return x.from===m.id;});
+  var ch=chAt(m.t,m.t+1).map(function(c){return esc(c.name);}).join(' · ');
+  var h=(m.ph?'<span class="ph" style="'+photo(m)+'"></span>':'')+
+    '<h3>'+fmt(m.t)+' · '+age(m.t)+' anos · semana '+weekNo(m.t)+(ch?' · '+ch:'')+'</h3>'+
+    '<p class="full">'+esc(m.x)+'</p>'+
+    '<div class="card"><span class="meta"><i style="background:var(--e-'+m.emo+')"></i>'+m.emo+' · intensidade '+['leve','média','forte'][m.int-1]+'</span></div>';
+  if(from||to.length){ h+='<div class="links">'+
+    (from?'<button type="button" data-go="'+from.id+'"><span>veio de</span>'+esc(from.x)+'</button>':'')+
+    to.map(function(x){return '<button type="button" data-go="'+x.id+'"><span>levou a</span>'+esc(x.x)+'</button>';}).join('')+'</div>'; }
+  h+='<label class="inline"><input type="checkbox" id="mute-'+m.id+'" data-mute="'+m.id+'"'+(m.mute?' checked':'')+'> Não me lembrar disto em "nesta semana"</label>'+
+     '<div class="acts"><button type="button" class="btn" data-close>Fechar</button></div>';
+  $('#dlg-mem-in').innerHTML=h; dlgMem.showModal();
+}
+function openAdd(t){
+  var x=new Date(Math.min(t||NOW,NOW)), p=function(n){return String(n).padStart(2,'0');};
+  $('#f-date').value=x.getFullYear()+'-'+p(x.getMonth()+1)+'-'+p(x.getDate());
+  $('#f-date').max=T0.getFullYear()+'-'+p(T0.getMonth()+1)+'-'+p(T0.getDate());
+  $('#f-text').value=''; dlgAdd.showModal(); $('#f-text').focus();
+}
+$('#btn-add').addEventListener('click',function(){ openAdd(NOW); });
+$('#f-cancel').addEventListener('click',function(){ dlgAdd.close(); });
+$('#form-add').addEventListener('submit',function(ev){
+  ev.preventDefault();
+  var p=$('#f-date').value.split('-'), t=d(+p[0],+p[1],+p[2]);
+  if(isNaN(t)||t<BIRTH) t=BIRTH+DAY;
+  var m={id:'m'+(nextId++),t:t,x:$('#f-text').value.trim(),emo:$('#f-emo').value,int:+$('#f-int').value};
+  if(!m.x) return;
+  memories.push(m); memories.sort(function(a,b){return a.t-b.t;});
+  dlgAdd.close(); render(); goTo(m.id);
+});
+document.addEventListener('click',function(ev){
+  var el=ev.target.closest('[data-go],[data-add],[data-zoom],[data-close],.card[data-id]'); if(!el) return;
+  if(el.dataset.go) goTo(el.dataset.go);
+  else if(el.dataset.add) openAdd(+el.dataset.add);
+  else if(el.dataset.zoom) setGran('month',+el.dataset.zoom);
+  else if(el.hasAttribute('data-close')) dlgMem.close();
+  else if(el.dataset.id) openMem(el.dataset.id);
+});
+document.addEventListener('change',function(ev){
+  var id=ev.target.dataset&&ev.target.dataset.mute; if(!id) return;
+  byId(id).mute=ev.target.checked; var y=window.scrollY; render(); window.scrollTo(0,y);
+});
+[dlgMem,dlgAdd].forEach(function(dg){ dg.addEventListener('click',function(ev){ if(ev.target===dg) dg.close(); }); });
+
+/* ---------- início ---------- */
+var rz; function relayout(){ clearTimeout(rz); rz=setTimeout(function(){ measure(); drawMini(); onScroll(); },120); }
+window.addEventListener('resize',relayout);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawMini);
+new MutationObserver(drawMini).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+render(); goToday(false);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ var t=dateAtY(window.scrollY+window.innerHeight*.3); measure(); scrollToDate(t,false,.3); onScroll(); });
+})();
+</script>

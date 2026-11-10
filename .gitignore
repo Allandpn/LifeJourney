@@ -1,0 +1,5 @@
+# dados pessoais de saúde e casos de teste reais ficam fora do git
+dados-pessoais/
+*.local.json
+node_modules/
+.idea/
