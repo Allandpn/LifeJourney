@@ -3,7 +3,7 @@
 ## Regras gerais
 
 - Toda entidade tem `id` (texto único), `criadoEm` e `atualizadoEm`.
-- Toda entidade pertence a um usuário (`usuarioId`). Hoje há um só, mas o modelo não impede outros.
+- Toda entidade pertence a um usuário (`usuarioId`). Nenhum dado é compartilhado entre usuários.
 - Apagar marca o registro com `excluidoEm` em vez de removê-lo. Assim os outros aparelhos ficam sabendo da exclusão ao sincronizar.
 - **Guardamos datas, não números de semana.** A semana de vida é calculada a partir da data de nascimento. Assim nada precisa ser recalculado se a data de nascimento for corrigida.
 - Datas sem hora usam o formato `AAAA-MM-DD`.
@@ -15,9 +15,29 @@
 |---|---|---|
 | `email` | texto | Usado para entrar |
 | `senhaHash` | texto | A senha nunca é guardada; só um código derivado dela |
+| `administrador` | sim/não | Pode gerar convites e links de redefinição de senha. Não dá acesso aos dados de outras contas pelo aplicativo |
 | `nascimento` | data | Obrigatório |
 | `sexo` | `masculino` ou `feminino` | Necessário para a tábua do IBGE |
 | `ultimoBackup` | data e hora | Opcional |
+
+## Convite
+
+| Campo | Tipo | Observação |
+|---|---|---|
+| `codigo` | texto aleatório | Vai no link de convite; guardado só como código derivado |
+| `validoAte` | data e hora | Expira em poucos dias |
+| `usadoPor` | id de usuário | Cada convite cria uma conta só |
+
+## Sessão
+
+Um registro por aparelho conectado. Permite listar os aparelhos e desconectar um deles.
+
+| Campo | Tipo | Observação |
+|---|---|---|
+| `usuarioId` | id | Dono da sessão |
+| `aparelho` | texto | Descrição do navegador e do sistema |
+| `ultimoUso` | data e hora | |
+| `expiraEm` | data e hora | |
 
 ## Memória
 
@@ -83,5 +103,7 @@ A exportação gera um arquivo ZIP com:
 - `dados.json`: todas as entidades acima, com um número de versão do formato;
 - `fotos/`: os arquivos de imagem, nomeados pelo id da memória;
 - `memorias.md`: as memórias em texto legível, agrupadas por capítulo, para leitura sem o aplicativo.
+
+A exportação e a importação valem só para a conta de quem está logado.
 
 A importação casa os registros pelo `id`. Registro com o mesmo id é atualizado se o do arquivo for mais recente; nada é duplicado.

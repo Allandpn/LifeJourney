@@ -14,7 +14,9 @@ O sistema tem três objetivos, um para cada parte do tempo:
 
 ## Para quem
 
-Uma pessoa só, usando principalmente o celular e às vezes o computador. Ela entra com login e vê os mesmos dados em todos os aparelhos. Não há rede social nem compartilhamento entre pessoas.
+Pessoas que querem rever e planejar a própria vida, usando principalmente o celular e às vezes o computador. Cada pessoa tem a própria conta e vê os mesmos dados em todos os seus aparelhos.
+
+As contas são totalmente separadas: ninguém vê nada de outra pessoa. Não há rede social nem compartilhamento.
 
 ## O que o diferencia
 
@@ -35,7 +37,7 @@ Valem para toda decisão de design e de código.
 4. **Fases difíceis têm o mesmo peso que conquistas.** O sistema não força tom positivo.
 5. **Toda pergunta do questionário precisa de um número publicado.** Só entra o que tiver risco relativo de mortalidade vindo de meta-análise ou coorte grande.
 6. **Conservador.** Na dúvida entre dois efeitos, usa-se o menor; o ajuste total tem teto e piso.
-7. **Os dados são do usuário.** Ficam em um servidor próprio, atrás de login, e nunca são compartilhados com terceiros. A exportação em formato aberto está sempre disponível.
+7. **Os dados são de cada usuário.** Ficam em um servidor próprio, atrás de login, isolados por conta, e nunca são compartilhados com terceiros. Cada pessoa pode exportar tudo em formato aberto e apagar a própria conta quando quiser.
 8. **Não é aconselhamento médico.** O "e se?" mostra ganhos, nunca perdas, e fica fora da tela principal.
 9. **Sem obrigação diária.** O usuário registra quando algo importa e pode preencher o passado aos poucos.
 
@@ -43,7 +45,7 @@ Valem para toda decisão de design e de código.
 
 ### Dentro
 
-- Login e sincronização entre aparelhos.
+- Contas individuais, criadas por convite, com login e sincronização entre aparelhos.
 - Data de nascimento e sexo.
 - Linha do tempo rolável com granularidade ano / mês / semana.
 - Memórias com texto, foto, emoção e intensidade.
@@ -58,7 +60,8 @@ Valem para toda decisão de design e de código.
 
 ### Fora
 
-- Cadastro aberto a outras pessoas (o login existe, mas a conta é criada pelo dono do servidor).
+- Cadastro aberto a qualquer pessoa (as contas são criadas por convite).
+- Recuperação de senha por e-mail (na v1 o administrador gera um link de redefinição).
 - Registrar memórias sem conexão (na v1, sem internet o aplicativo só mostra o que já foi carregado).
 - Componente social.
 - Recursos de IA.

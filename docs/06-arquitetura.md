@@ -48,7 +48,18 @@ A divisão é clara: tudo o que é regra, número ou dado fica em Python; o Type
 
 ### Hospedagem
 
-O servidor precisa ficar acessível pela internet, com HTTPS. A escolha do serviço está em aberto (ver [Decisões](08-decisoes.md)). Durante o desenvolvimento, tudo roda no próprio computador.
+O servidor roda em um Raspberry Pi 4 ligado 24 horas, junto com outros projetos pessoais.
+
+| Escolha | O que é | Por quê |
+|---|---|---|
+| Docker Compose | Empacota o servidor em um contêiner | Isola este projeto dos outros que rodam no mesmo Pi e facilita atualizar |
+| Cloudflare Tunnel | Liga o Pi à internet sem abrir portas no roteador | HTTPS automático e o endereço de casa não fica exposto. Exige um domínio próprio |
+| Banco e fotos em SSD externo | Em vez do cartão SD | Cartões SD falham com gravação constante |
+| Cópia de segurança noturna, cifrada | Banco e fotos copiados para outro local | O Pi é um ponto único de falha; sem cópia, um defeito apaga tudo de todos |
+
+Durante o desenvolvimento, tudo roda no próprio computador. O Pi só entra na etapa de publicação.
+
+O Raspberry Pi 4 dá conta com folga: o cálculo é leve e o número de usuários é pequeno.
 
 ## Sincronização
 
@@ -80,13 +91,14 @@ LifeJourney/
 ├── servidor/
 │   ├── app/
 │   │   ├── nucleo/          cálculo: tábua, risco combinado, sobrevivência, "e se?"
-│   │   ├── modelos.py       Usuário, Memória, Capítulo, Intenção...
-│   │   ├── api/             login, memórias, capítulos, intenções, questionário, backup
+│   │   ├── modelos.py       Usuário, Convite, Sessão, Memória, Capítulo, Intenção...
+│   │   ├── api/             contas, convites, memórias, capítulos, intenções, questionário, backup
 │   │   └── config.py        lê o .env
 │   ├── dados/
 │   │   ├── tabua-ibge-2024.csv
 │   │   └── fatores.json     HRs, prevalências e parâmetros, com fontes
 │   ├── testes/
+│   ├── Dockerfile
 │   └── pyproject.toml
 ├── aplicativo/
 │   └── src/
@@ -95,21 +107,53 @@ LifeJourney/
 │       ├── telas/           entrar, memória, capítulo, intenção, questionário, backup
 │       ├── estilo/          cores, tipografia
 │       └── api.ts           conversa com o servidor
+├── docker-compose.yml       como o servidor roda no Raspberry Pi
 ├── .env.exemplo             modelo do arquivo de segredos (o .env real fica fora do git)
 └── dados-pessoais/          fora do git
 ```
 
 ## Segurança e privacidade
 
-O sistema guarda memórias pessoais e respostas de saúde em um servidor, e o repositório é público. Regras:
+O sistema guarda memórias pessoais e respostas de saúde de mais de uma pessoa, em um servidor doméstico, e o repositório é público. Dados de saúde são dados pessoais sensíveis pela LGPD.
 
-- **Nada sensível no git.** Senhas, chaves e endereços ficam no `.env`. Dados reais e o caso de teste pessoal ficam em `dados-pessoais/`. Ambos estão no `.gitignore`.
+### Contas e acesso
+
+- **Contas por convite.** Não há cadastro aberto. O administrador gera um link que vale poucos dias e cria uma conta só.
+- **Senha nunca guardada**, só o código derivado (Argon2). Senha mínima de 10 caracteres.
+- **Tentativas de login limitadas** por conta e por endereço, para barrar adivinhação de senha.
+- **Sessão em cookie protegido** (`HttpOnly`, `Secure`, `SameSite`). O usuário vê os aparelhos conectados e pode desconectar qualquer um.
+- **Redefinição de senha** por link gerado pelo administrador, já que a v1 não envia e-mails.
+
+### Isolamento entre contas
+
+- **Toda consulta filtra pelo usuário logado.** Isso é feito em um ponto único do código, para não depender de lembrar em cada rota.
+- **Um registro de outra conta responde "não encontrado"**, como se não existisse.
+- **Fotos em pastas separadas por conta**, servidas só por rota com login. Não há endereço público para imagens.
+- **Testes automáticos de isolamento:** para cada rota, um segundo usuário tenta ler, alterar e apagar dados do primeiro, e tem que falhar.
+
+### O que o administrador pode ver
+
+Quem administra o Pi tem acesso físico ao banco de dados. Pelo aplicativo, o administrador não vê dados de outras contas, mas tecnicamente poderia abrir o arquivo do banco.
+
+Na v1 isso é tratado com transparência: a tela de criação de conta avisa quem administra o servidor. Impedir esse acesso de verdade exige cifrar os dados com a senha de cada usuário, o que complica a redefinição de senha e o cálculo no servidor. Fica como candidato a v2.
+
+### Dados em repouso e em trânsito
+
 - **HTTPS sempre** fora do computador de desenvolvimento.
-- **Senha nunca guardada**, só o código derivado (Argon2).
-- **Cada consulta filtra pelo usuário logado.** Nenhuma rota devolve dados sem login.
-- **Sem cadastro aberto.** A conta é criada por um comando no servidor.
-- **Fotos só para quem está logado.** Não há endereço público para as imagens.
-- **Exportação sempre disponível**, para o usuário nunca depender do servidor.
+- **Disco cifrado** para o banco e as fotos, o que protege em caso de furto do aparelho.
+- **Cópias de segurança cifradas** antes de sair do Pi.
+- **Registros do servidor sem conteúdo pessoal:** nada de textos de memórias ou respostas de saúde em logs.
+
+### Direitos de cada usuário
+
+- **Exportar tudo** em formato aberto, a qualquer momento.
+- **Apagar a conta**, o que remove os dados e as fotos do servidor. As cópias de segurança antigas expiram em prazo definido.
+
+### Repositório público
+
+- **Nada sensível no git.** Senhas, chaves e endereços ficam no `.env`. Dados reais e casos de teste pessoais ficam em `dados-pessoais/`. Ambos estão no `.gitignore`.
+- **Dados de exemplo sempre fictícios.**
+- **Dependências atualizadas**, porque o servidor fica exposto à internet.
 
 ## Testes
 
@@ -121,7 +165,9 @@ Desde o início, com pytest:
 | Perfil médio | Respostas iguais à média brasileira dão `HR_total` 1,0 |
 | Limites | `q'_x` nunca passa de 1; `HR_total` respeita teto e piso |
 | Calibração | Diferença entre perfis extremos perto de Li et al. (2018) |
-| Login | Sem login, toda rota de dados recusa; um usuário não vê dados de outro |
+| Login | Sem login, toda rota de dados recusa; tentativas repetidas são bloqueadas |
+| Isolamento | Um usuário não consegue ler, alterar nem apagar dados de outro, em nenhuma rota |
+| Convites | Convite vencido ou já usado não cria conta |
 | Backup | Exportar e importar devolve os mesmos dados, sem duplicar |
 
 ## Desempenho

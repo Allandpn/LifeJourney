@@ -2,7 +2,7 @@
 
 Aplicativo pessoal que mostra a vida como uma linha do tempo rolável. O passado é um histórico de memórias e capítulos, o presente é a semana atual, e o futuro é um espaço aberto cuja forma vem de uma estimativa de longevidade baseada na tábua de mortalidade do IBGE.
 
-O uso principal é no celular. O usuário entra com login, e os dados ficam sincronizados entre os aparelhos por um servidor próprio.
+O uso principal é no celular. Cada pessoa tem a própria conta, e os dados ficam sincronizados entre os aparelhos por um servidor próprio, hospedado em um Raspberry Pi.
 
 ## Estado atual
 
