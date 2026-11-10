@@ -113,7 +113,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .card.i1{--pw:250px}.card.i2{--pw:340px}.card.i3{--pw:460px}
 .card:not(.has-ph){--pw:430px}
 .card .meta,.intent .meta,.dlg .meta{font-family:var(--display);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-variant-numeric:tabular-nums}
-.emo{display:inline-flex;align-items:center;gap:8px;color:var(--e);font-weight:600}
+.emo{display:inline-flex;align-items:center;gap:8px;color:var(--fg);font-weight:500}
 .emo::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--e);box-shadow:0 0 10px var(--e)}
 .card .from{font-size:.8rem;color:var(--muted);font-style:italic}
 .card:not(.has-ph):hover .tx{color:var(--fg);text-decoration:underline;text-decoration-color:var(--e);text-decoration-thickness:1px;text-underline-offset:6px}
@@ -345,12 +345,15 @@ function fmt(t){var x=new Date(t);return x.getDate()+' '+MES[x.getMonth()]+' '+x
 function weekNo(t){return (Math.floor((t-BIRTH)/WEEK)+1).toLocaleString('pt-BR');}
 function yr(t){return new Date(t).getFullYear();}
 function chAt(s,e){return chapters.filter(function(c){return c.s<e && c.end>s;});}
+function mainCh(t){return chAt(t,t+1).sort(function(a,b){return a.lane-b.lane;})[0];}
+function eraColor(t){var c=mainCh(t);return c?'var('+c.color+')':'var(--muted)';}
 function byId(id){return memories.filter(function(m){return m.id===id;})[0];}
-var ART={alegria:['#4d2459','#ffbe6b',285,40],calma:['#0f2c3c','#7fe3c0',185,36],orgulho:['#451430','#ff8a5c',345,42],
-  saudade:['#111a44','#7fb2ff',228,42],tristeza:['#12141d','#8d93ad',232,14],incerteza:['#1f1140','#b79bff',262,38]};
+var ART={'--k-ochre':['#4d2459','#ffbe6b',285,40],'--k-sage':['#0f2c3c','#7fe3c0',185,36],'--k-clay':['#451430','#ff9a5a',345,42],
+  '--k-blue':['#111a44','#7fb2ff',228,42],'--k-stone':['#12141d','#8d93ad',232,14],'--k-plum':['#2a1040','#ff8fc0',300,38],
+  '--k-terra':['#3a0f2a','#ff7d7d',330,44]};
 function photo(m){
   var seed=(parseInt(m.id.slice(1),10)*7919+13)>>>0, R=function(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  var a=ART[m.emo]||ART.calma, i, x, y;
+  var mc=mainCh(m.t), a=ART[mc?mc.color:'--k-stone'], i, x, y;
   var v='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1">'+
     '<stop offset="0" stop-color="'+a[0]+'"/><stop offset="1" stop-color="'+a[1]+'"/></linearGradient></defs><rect width="400" height="300" fill="url(#s)"/>'+
     '<circle cx="'+Math.round(70+R()*260)+'" cy="'+Math.round(55+R()*60)+'" r="'+Math.round(18+R()*16)+'" fill="#fffaf0" fill-opacity=".92"/>';
@@ -441,11 +444,11 @@ function periodLabel(r){
 }
 function memCard(m){
   var from=m.from&&gran!=='year'?byId(m.from):null;
-  return '<button type="button" class="card i'+m.int+(m.ph?' has-ph':'')+'" data-id="'+m.id+'" style="--e:var(--e-'+m.emo+')">'+
+  return '<button type="button" class="card i'+m.int+(m.ph?' has-ph':'')+'" data-id="'+m.id+'" style="--e:'+eraColor(m.t)+'">'+
     (m.ph?'<span class="ph" style="'+photo(m)+'"></span>':'')+
     '<span class="tx">'+esc(m.x)+'</span>'+
     (from?'<span class="from">depois de: '+esc(from.x.slice(0,46))+'…</span>':'')+
-    '<span class="meta"><span class="emo" style="--e:var(--e-'+m.emo+')">'+m.emo+'</span>'+fmt(m.t)+'</span></button>';
+    '<span class="meta"><span class="emo">'+m.emo+'</span>'+fmt(m.t)+'</span></button>';
 }
 function intentCard(i){
   var when=i.from?'entre '+yr(i.from)+' e '+yr(i.to):(i.t?MES[new Date(i.t).getMonth()]+' de '+yr(i.t):'sem data');
@@ -494,7 +497,7 @@ function rowHTML(r,i){
     (extra?'<button type="button" class="more" data-zoom="'+r.s+'">+ '+extra+(extra>1?' memórias':' memória')+' neste ano</button>':'')+
     ints.map(function(x){return intentCard(x.o);}).join('');
   if(!r.items.length) body='<button type="button" class="more" data-add="'+r.s+'">registrar algo desta semana</button>';
-  var node=top?'<span class="node n'+mx+'" style="--nc:var(--e-'+top.emo+')"></span>':'<span class="node open"></span>';
+  var node=top?'<span class="node n'+mx+'" style="--nc:'+eraColor(top.t)+'"></span>':'<span class="node open"></span>';
   return h+spine(r,node)+'<header class="label">'+lab[0]+'<span class="sub">'+lab[1]+'</span></header><div class="body">'+body+'</div></section>';
 }
 
@@ -537,7 +540,7 @@ function onScroll(){
   var ch=fut?[]:chAt(t,t+1);
   ctx.innerHTML='<b>'+yr(t)+' · '+a+' anos</b>'+(fut?'<span>futuro em aberto</span>':'')+
     ch.map(function(c){return '<span class="chip"><i style="color:var('+c.color+');background:currentColor"></i>'+esc(c.name)+'</span>';}).join('');
-  var top=ch[ch.length-1]; document.documentElement.style.setProperty('--amb',top?'var('+top.color+')':'transparent');
+  var top=ch.slice().sort(function(a,b){return a.lane-b.lane;})[0]; document.documentElement.style.setProperty('--amb',top?'var('+top.color+')':'transparent');
   var H=miniC.clientHeight, t1=dateAtY(y+hh), t2=dateAtY(y+window.innerHeight);
   var y1=(t1-BIRTH)/(END-BIRTH)*H, y2=(t2-BIRTH)/(END-BIRTH)*H;
   miniV.style.top=(miniC.offsetTop+y1)+'px'; miniV.style.height=Math.max(8,y2-y1)+'px';
@@ -556,7 +559,7 @@ function drawMini(){
   for(var row=0;row<N;row++) for(var col=0;col<52;col++){
     var k=row*52+col, t=BIRTH+k/52*YEAR;
     if(k<=nowW){
-      var cs=chAt(t,t+1), c=cs[cs.length-1];
+      var c=mainCh(t);
       if(memW[k]){ g.globalAlpha=1; g.fillStyle=v('--fg'); }
       else if(c){ g.globalAlpha=.8; g.fillStyle=v(c.color); }
       else { g.globalAlpha=1; g.fillStyle=v('--line'); }
@@ -600,7 +603,7 @@ function openMem(id){
   var h=(m.ph?'<span class="ph" style="'+photo(m)+'"></span>':'')+
     '<h3>'+fmt(m.t)+' · '+age(m.t)+' anos · semana '+weekNo(m.t)+(ch?' · '+ch:'')+'</h3>'+
     '<p class="full">'+esc(m.x)+'</p>'+
-    '<div class="meta"><span class="emo" style="--e:var(--e-'+m.emo+')">'+m.emo+'</span>intensidade '+['leve','média','forte'][m.int-1]+'</div>';
+    '<div class="meta"><span class="emo" style="--e:'+eraColor(m.t)+'">'+m.emo+'</span>intensidade '+['leve','média','forte'][m.int-1]+'</div>';
   if(from||to.length){ h+='<div class="links">'+
     (from?'<button type="button" data-go="'+from.id+'"><span>veio de</span>'+esc(from.x)+'</button>':'')+
     to.map(function(x){return '<button type="button" data-go="'+x.id+'"><span>levou a</span>'+esc(x.x)+'</button>';}).join('')+'</div>'; }
