@@ -112,9 +112,14 @@ LifeJourney/
 ├── aplicativo/
 │   └── src/
 │       ├── linha-do-tempo/
-│       ├── minimapa/
-│       ├── telas/           entrar, memória, capítulo, intenção, questionário, backup
-│       ├── estilo/          cores, tipografia
+│       │   ├── linhas.ts    monta as linhas da rolagem a partir dos dados (só cálculo, com testes)
+│       │   ├── desenho.ts   transforma as linhas em HTML
+│       │   └── tela.ts      rolagem, cabeçalho, minimapa e toques
+│       ├── minimapa/        a vida em semanas, em <canvas>
+│       ├── telas/           boas-vindas (depois: memória, capítulo, intenção, questionário, backup)
+│       ├── estilo/          cores, tipografia; celular como base, computador a partir de 761px
+│       ├── tipos.ts         formato dos dados da API
+│       ├── tempo.ts         datas, idade e semana de vida
 │       └── api.ts           conversa com o servidor
 ├── docker-compose.yml       como o servidor roda no Raspberry Pi
 ├── .env.exemplo             modelo do arquivo de segredos (o .env real fica fora do git)

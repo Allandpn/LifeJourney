@@ -1,25 +1,51 @@
 import "./estilo/base.css";
-import { semanaDeVida } from "./semanas";
+import "./estilo/linha-do-tempo.css";
+import { api, ErroDaApi } from "./api";
+import { TelaDaLinhaDoTempo } from "./linha-do-tempo/tela";
+import { mostrarBoasVindas } from "./telas/boas-vindas";
 
-// Data fictícia, só para a página de exemplo.
-const NASCIMENTO_EXEMPLO = new Date(1990, 2, 14);
+const $ = <T extends HTMLElement>(seletor: string) => document.querySelector<T>(seletor)!;
 
-const semana = document.querySelector<HTMLParagraphElement>("#semana")!;
-semana.textContent = `Semana ${semanaDeVida(NASCIMENTO_EXEMPLO, new Date()).toLocaleString("pt-BR")} de uma vida de exemplo`;
+function mostrarAviso(texto: string): void {
+  const aviso = $("#aviso");
+  aviso.textContent = texto;
+  aviso.hidden = false;
+}
 
-const servidor = document.querySelector<HTMLParagraphElement>("#servidor")!;
+async function iniciar(): Promise<void> {
+  const perfil = await api.perfil();
+  if (!perfil.nascimento || !perfil.sexo) {
+    document.body.dataset.tela = "boas-vindas";
+    mostrarBoasVindas($("#boas-vindas"), () => void iniciar().catch(tratarErro));
+    return;
+  }
+  const [memorias, capitulos, intencoes, estimativa] = await Promise.all([
+    api.memorias(), api.capitulos(), api.intencoes(), api.estimativa(),
+  ]);
+  document.body.dataset.tela = "linha";
+  new TelaDaLinhaDoTempo(
+    {
+      lista: $("#linha"),
+      contexto: $("#contexto"),
+      cabecalho: $("#cabecalho"),
+      minimapa: $("#minimapa"),
+      canvas: $<HTMLCanvasElement>("#minimapa canvas"),
+      visor: $("#minimapa .visor"),
+      dialogo: $<HTMLDialogElement>("#detalhe"),
+      conteudoDoDialogo: $("#detalhe .conteudo"),
+      botoesDeGranularidade: Array.from(document.querySelectorAll<HTMLButtonElement>("[data-granularidade]")),
+      botaoHoje: $<HTMLButtonElement>("#botao-hoje"),
+    },
+    { nascimento: perfil.nascimento, memorias, capitulos, intencoes, estimativa },
+  ).iniciar();
+}
 
-async function verificarServidor(): Promise<void> {
-  try {
-    const resposta = await fetch("/api/saude");
-    if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
-    const dados: { status: string; versao: string } = await resposta.json();
-    servidor.textContent = `Servidor no ar · versão ${dados.versao}`;
-    servidor.dataset.estado = "ok";
-  } catch {
-    servidor.textContent = "Servidor fora do ar. Inicie-o com: uvicorn app.principal:app --reload";
-    servidor.dataset.estado = "erro";
+function tratarErro(erro: unknown): void {
+  if (erro instanceof ErroDaApi && erro.status === 0) {
+    mostrarAviso("Sem conexão com o servidor. Confira se ele está ligado e recarregue a página.");
+  } else {
+    mostrarAviso(erro instanceof Error ? erro.message : "Algo deu errado ao carregar a linha do tempo.");
   }
 }
 
-verificarServidor();
+iniciar().catch(tratarErro);

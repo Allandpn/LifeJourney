@@ -6,11 +6,12 @@ O uso principal é no celular. Cada pessoa tem a própria conta, e os dados fica
 
 ## Estado atual
 
-Etapas 0 a 2 do [roteiro](docs/07-roteiro.md) concluídas:
+Etapas 0 a 3 do [roteiro](docs/07-roteiro.md) concluídas:
 
 - o servidor em Python e o aplicativo em TypeScript existem, se conversam e têm testes;
 - o núcleo de cálculo (`servidor/app/nucleo/`) estima a faixa de vida e o "e se?", com a tábua provisória e todos os números em [`servidor/dados/fatores.json`](servidor/dados/fatores.json).
 
+- o aplicativo mostra a linha do tempo do protótipo, lendo da API: rolagem com granularidade ano, mês e semana, capítulos, "Hoje", futuro com a faixa estimada e minimapa. Ainda não dá para registrar nada pelo aplicativo (etapa 4);
 - a API grava e devolve memórias, capítulos, intenções e o perfil, num banco SQLite, com cada registro isolado por dono. O login ainda não existe (etapa 5): em modo desenvolvimento, tudo é gravado para um usuário de desenvolvimento.
 
 Os números ainda são provisórios: as médias brasileiras são placeholders e a calibração está pendente (ver [Modelo de cálculo](docs/05-modelo-de-calculo.md)).
@@ -37,6 +38,12 @@ Para rodar os testes:
 
 ```powershell
 .venv\Scripts\pytest
+```
+
+Para preencher a conta de desenvolvimento com uma vida fictícia (a mesma do protótipo):
+
+```powershell
+.venv\Scripts\python -m app.exemplo
 ```
 
 Para ver o cálculo com um perfil fictício:

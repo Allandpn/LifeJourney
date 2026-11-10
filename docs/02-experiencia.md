@@ -18,6 +18,8 @@ A tela principal é uma linha vertical contínua. O passado fica acima, o futuro
 
 A rolagem tem começo (o nascimento) e um fim suave, pouco depois do percentil 90 da estimativa.
 
+Na v1 não há fotos nem registro pelo aplicativo ainda: eles entram na etapa 4 do roteiro.
+
 ## Granularidade
 
 O usuário escolhe o nível de detalhe. Trocar de nível mantém o ponto da linha em que ele estava.

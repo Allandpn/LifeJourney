@@ -96,6 +96,7 @@ A implementação está em `servidor/app/modelos.py` (tabelas) e `servidor/app/e
 | `POST /api/memorias` | Cria |
 | `GET` / `PATCH` / `DELETE /api/memorias/{id}` | Lê, altera só os campos enviados, exclui |
 | `/api/capitulos` e `/api/intencoes` | As mesmas cinco operações |
+| `GET /api/estimativa` | Faixa estimada para o perfil (média brasileira até o questionário existir), com a curva de sobrevivência ano a ano |
 
 Regras que a API garante:
 

@@ -8,13 +8,36 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" />
   </head>
-  <body>
-    <main class="inicio">
-      <p class="etiqueta">Etapa 0 · preparação</p>
-      <h1>Vida em <span>Semanas</span></h1>
-      <p class="semana" id="semana"></p>
-      <p class="servidor" id="servidor">Verificando o servidor…</p>
-    </main>
+  <body data-tela="carregando">
+    <div class="ambiente" aria-hidden="true"></div>
+
+    <header class="cabecalho" id="cabecalho">
+      <div class="cabecalho-dentro">
+        <div class="barra">
+          <div class="marca"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="nome">Vida em <em>Semanas</em></span></div>
+          <div class="granularidade" role="group" aria-label="Nível de detalhe">
+            <button type="button" data-granularidade="ano" aria-pressed="true">Ano</button>
+            <button type="button" data-granularidade="mes" aria-pressed="false">Mês</button>
+            <button type="button" data-granularidade="semana" aria-pressed="false">Semana</button>
+          </div>
+          <button type="button" class="botao" id="botao-hoje">Hoje</button>
+        </div>
+        <div class="contexto" id="contexto"></div>
+      </div>
+    </header>
+
+    <p class="aviso" id="aviso" role="alert" hidden></p>
+    <section id="boas-vindas" hidden></section>
+
+    <div class="rolagem"><main class="linha-do-tempo" id="linha"></main></div>
+
+    <aside class="minimapa" id="minimapa" aria-label="A vida inteira em semanas. Toque para ir a um período.">
+      <canvas></canvas>
+      <div class="visor"></div>
+    </aside>
+
+    <dialog id="detalhe" aria-label="Memória"><div class="conteudo"></div></dialog>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

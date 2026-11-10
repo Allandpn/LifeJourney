@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app import __version__
-from app.api import capitulos, intencoes, memorias, perfil
+from app.api import capitulos, estimativa, intencoes, memorias, perfil
 from app.banco import criar_tabelas, obter_motor
 from app.config import obter_configuracao
 
@@ -34,7 +34,7 @@ app = FastAPI(
     lifespan=ciclo_de_vida,
 )
 
-for modulo in (perfil, memorias, capitulos, intencoes):
+for modulo in (perfil, memorias, capitulos, intencoes, estimativa):
     app.include_router(modulo.rotas)
 
 
