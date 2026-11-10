@@ -1,15 +1,80 @@
 import "./estilo/base.css";
 import "./estilo/linha-do-tempo.css";
+import "./estilo/formularios.css";
 import { api, ErroDaApi } from "./api";
-import { TelaDaLinhaDoTempo } from "./linha-do-tempo/tela";
+import { type Dados, TelaDaLinhaDoTempo } from "./linha-do-tempo/tela";
 import { mostrarBoasVindas } from "./telas/boas-vindas";
+import { formularioDeCapitulo, formularioDeIntencao, formularioDeMemoria, hojeIso } from "./telas/formularios";
 
 const $ = <T extends HTMLElement>(seletor: string) => document.querySelector<T>(seletor)!;
+
+let tela: TelaDaLinhaDoTempo | null = null;
+let dados: Dados | null = null;
 
 function mostrarAviso(texto: string): void {
   const aviso = $("#aviso");
   aviso.textContent = texto;
   aviso.hidden = false;
+}
+
+async function carregar(nascimento: string): Promise<Dados> {
+  const [memorias, capitulos, intencoes, estimativa] = await Promise.all([
+    api.memorias.listar(), api.capitulos.listar(), api.intencoes.listar(), api.estimativa(),
+  ]);
+  return { nascimento, memorias, capitulos, intencoes, estimativa };
+}
+
+/** Depois de salvar: busca tudo de novo e redesenha, indo para o que mudou. */
+async function recarregar(foco?: { memoria?: string; data?: string }): Promise<void> {
+  if (!dados || !tela) return;
+  try {
+    dados = await carregar(dados.nascimento);
+    tela.atualizar(dados, foco);
+  } catch (erro) {
+    tratarErro(erro);
+  }
+}
+
+const pedidos = {
+  novaMemoria: (data?: string) =>
+    formularioDeMemoria({ data, nascimento: dados!.nascimento, todas: dados!.memorias, aoSalvar: recarregar }),
+  editarMemoria: (id: string) => {
+    const memoria = dados!.memorias.find((m) => m.id === id);
+    if (memoria) formularioDeMemoria({ memoria, nascimento: dados!.nascimento, todas: dados!.memorias, aoSalvar: recarregar });
+  },
+  novoCapitulo: () => formularioDeCapitulo({ inicio: hojeIso(), nascimento: dados!.nascimento, aoSalvar: recarregar }),
+  editarCapitulo: (id: string) => {
+    const capitulo = dados!.capitulos.find((c) => c.id === id);
+    if (capitulo) formularioDeCapitulo({ capitulo, nascimento: dados!.nascimento, aoSalvar: recarregar });
+  },
+  novaIntencao: () => formularioDeIntencao({ aoSalvar: recarregar }),
+  editarIntencao: (id: string) => {
+    const intencao = dados!.intencoes.find((i) => i.id === id);
+    if (intencao) formularioDeIntencao({ intencao, aoSalvar: recarregar });
+  },
+};
+
+function ligarMenuDeCriar(): void {
+  const botao = $<HTMLButtonElement>("#botao-criar");
+  const menu = $("#menu-criar");
+  const fechar = () => {
+    menu.hidden = true;
+    botao.setAttribute("aria-expanded", "false");
+  };
+  botao.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.hidden = !menu.hidden;
+    botao.setAttribute("aria-expanded", String(!menu.hidden));
+  });
+  menu.addEventListener("click", (e) => {
+    const opcao = (e.target as HTMLElement).closest<HTMLElement>("[data-criar]")?.dataset.criar;
+    fechar();
+    if (opcao === "memoria") pedidos.novaMemoria();
+    if (opcao === "capitulo") pedidos.novoCapitulo();
+    if (opcao === "intencao") pedidos.novaIntencao();
+  });
+  document.addEventListener("click", fechar);
+  document.addEventListener("keydown", (e) => e.key === "Escape" && fechar());
 }
 
 async function iniciar(): Promise<void> {
@@ -19,11 +84,9 @@ async function iniciar(): Promise<void> {
     mostrarBoasVindas($("#boas-vindas"), () => void iniciar().catch(tratarErro));
     return;
   }
-  const [memorias, capitulos, intencoes, estimativa] = await Promise.all([
-    api.memorias(), api.capitulos(), api.intencoes(), api.estimativa(),
-  ]);
+  dados = await carregar(perfil.nascimento);
   document.body.dataset.tela = "linha";
-  new TelaDaLinhaDoTempo(
+  tela = new TelaDaLinhaDoTempo(
     {
       lista: $("#linha"),
       contexto: $("#contexto"),
@@ -36,8 +99,10 @@ async function iniciar(): Promise<void> {
       botoesDeGranularidade: Array.from(document.querySelectorAll<HTMLButtonElement>("[data-granularidade]")),
       botaoHoje: $<HTMLButtonElement>("#botao-hoje"),
     },
-    { nascimento: perfil.nascimento, memorias, capitulos, intencoes, estimativa },
-  ).iniciar();
+    dados,
+    pedidos,
+  );
+  tela.iniciar();
 }
 
 function tratarErro(erro: unknown): void {
@@ -48,4 +113,5 @@ function tratarErro(erro: unknown): void {
   }
 }
 
+ligarMenuDeCriar();
 iniciar().catch(tratarErro);

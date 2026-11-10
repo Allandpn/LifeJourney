@@ -45,7 +45,7 @@ Um registro por aparelho conectado. Permite listar os aparelhos e desconectar um
 |---|---|---|
 | `data` | data | Obrigatório; não pode ser futura |
 | `texto` | texto | Obrigatório; limite de 280 caracteres (em avaliação) |
-| `foto` | referência a arquivo | Opcional; uma foto por memória na v1. O arquivo fica no servidor, em versão reduzida |
+| `foto` | referência a arquivo | Opcional; uma foto por memória na v1. O servidor regrava como JPEG de até 1600 px e descarta os metadados (EXIF), que podem conter o local GPS |
 | `emocao` | texto | Opcional: `alegria`, `calma`, `orgulho`, `saudade`, `tristeza`, `incerteza` |
 | `intensidade` | 1, 2 ou 3 | Leve, média, forte; padrão 2 |
 | `marcante` | sim/não | Memórias marcantes têm prioridade no nível Ano |
@@ -95,6 +95,7 @@ A implementação está em `servidor/app/modelos.py` (tabelas) e `servidor/app/e
 | `GET /api/memorias` | Lista em ordem de data; aceita `?de=` e `?ate=` |
 | `POST /api/memorias` | Cria |
 | `GET` / `PATCH` / `DELETE /api/memorias/{id}` | Lê, altera só os campos enviados, exclui |
+| `PUT` / `GET` / `DELETE /api/memorias/{id}/foto` | Envia (ou troca), mostra e remove a foto; só o dono acessa |
 | `/api/capitulos` e `/api/intencoes` | As mesmas cinco operações |
 | `GET /api/estimativa` | Faixa estimada para o perfil (média brasileira até o questionário existir), com a curva de sobrevivência ano a ano |
 

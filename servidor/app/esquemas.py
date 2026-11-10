@@ -105,6 +105,7 @@ class MemoriaLida(Lido, MemoriaDados):
     model_config = ConfigDict(from_attributes=True, extra="ignore")
 
     levou_a: list[str] = Field(default_factory=list, description="Memórias que apontam para esta em 'veio_de'.")
+    foto: str | None = Field(default=None, description="Endereço da foto, ou nenhum.")
 
 
 # ---------- Capítulo ----------

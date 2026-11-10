@@ -30,6 +30,8 @@ Registro curto do que foi decidido e do que falta decidir. Decisões tomadas nã
 
 | Até a etapa 5, um usuário de desenvolvimento, só em modo desenvolvimento | Permite testar a API antes do login; em produção o servidor recusa tudo |
 | Exclusão por marcação (`excluido_em`) | Outros aparelhos ficam sabendo da exclusão |
+| Fotos regravadas em JPEG de até 1600 px, sem metadados | Economiza espaço no Raspberry Pi e remove o local GPS e o modelo do celular |
+| Excluir pede um segundo toque, sem janela de confirmação | Evita exclusão por engano sem interromper |
 | Alembic para mudanças no banco, antes da etapa 7 | Até lá, mudar uma tabela é apagar o banco de desenvolvimento |
 
 ## Propostas, aguardando confirmação
@@ -48,7 +50,6 @@ Registro curto do que foi decidido e do que falta decidir. Decisões tomadas nã
 | O passado é o centro; a estimativa só dá forma ao futuro | Estimativa em destaque na tela principal |
 | Emoção e intensidade entram na v1 | Deixar para depois |
 | Campo `principal` no capítulo define a cor da época | Usar sempre o capítulo mais antigo em andamento |
-| Uma foto por memória na v1, guardada em versão reduzida | Várias fotos, originais |
 | Marcadores de texto discretos na faixa estimada | Só o esmaecimento, sem texto |
 | Revisão periódica de fase fica para depois da v1 | Incluir na v1 |
 

@@ -21,7 +21,7 @@ const NASCIMENTO = lerData("1990-03-14");
 function memoria(data: string, campos: Partial<Memoria> = {}): Memoria {
   return {
     id: data, data, texto: `Memória de ${data}`, emocao: null, intensidade: 2,
-    marcante: false, silenciar: false, veio_de: [], levou_a: [], tags: [], ...campos,
+    marcante: false, silenciar: false, veio_de: [], levou_a: [], tags: [], foto: null, ...campos,
   };
 }
 

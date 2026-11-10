@@ -23,7 +23,13 @@ export interface Memoria {
   veio_de: string[];
   levou_a: string[];
   tags: string[];
+  foto: string | null; // endereço da foto na API
 }
+
+/** O que o aplicativo envia para criar ou alterar uma memória. */
+export type MemoriaDados = Pick<Memoria, "data" | "texto" | "emocao" | "intensidade" | "marcante" | "silenciar" | "veio_de">;
+export type CapituloDados = Omit<Capitulo, "id">;
+export type IntencaoDados = Omit<Intencao, "id">;
 
 export interface Capitulo {
   id: string;

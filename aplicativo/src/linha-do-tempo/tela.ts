@@ -15,6 +15,14 @@ export interface Dados {
   estimativa: Estimativa | null;
 }
 
+/** O que a tela pede para quem a criou (main.ts) quando a pessoa quer registrar ou editar. */
+export interface Pedidos {
+  novaMemoria(data?: string): void;
+  editarMemoria(id: string): void;
+  editarCapitulo(id: string): void;
+  editarIntencao(id: string): void;
+}
+
 interface Medida {
   topo: number;
   altura: number;
@@ -30,7 +38,7 @@ export class TelaDaLinhaDoTempo {
   private agendado = false;
   private readonly nascimento: number;
   private readonly hoje = inicioDoDia(Date.now());
-  private readonly memoriaPorId: Map<string, Memoria>;
+  private memoriaPorId: Map<string, Memoria>;
 
   constructor(
     private readonly el: {
@@ -45,7 +53,8 @@ export class TelaDaLinhaDoTempo {
       botoesDeGranularidade: HTMLButtonElement[];
       botaoHoje: HTMLButtonElement;
     },
-    private readonly dados: Dados,
+    private dados: Dados,
+    private readonly pedidos: Pedidos,
   ) {
     this.nascimento = lerData(dados.nascimento);
     this.memoriaPorId = new Map(dados.memorias.map((m) => [m.id, m]));
@@ -63,13 +72,23 @@ export class TelaDaLinhaDoTempo {
     this.irParaHoje(false);
   }
 
+  /** Redesenha com dados novos, mantendo a posição ou indo para o que acabou de mudar. */
+  atualizar(dados: Dados, foco?: { memoria?: string; data?: string }): void {
+    const ancora = this.dataNaPosicao(window.scrollY + window.innerHeight * 0.4);
+    this.dados = dados;
+    this.memoriaPorId = new Map(dados.memorias.map((m) => [m.id, m]));
+    this.desenhar();
+    if (foco?.memoria && this.memoriaPorId.has(foco.memoria)) this.irParaMemoria(foco.memoria);
+    else this.rolarAte(foco?.data ? lerData(foco.data) : ancora, false);
+  }
+
   // ---------- desenho ----------
 
   private contexto(): Contexto {
     return {
       nascimento: this.nascimento, hoje: this.hoje, granularidade: this.granularidade,
       faixas: this.linha.faixas, capitulos: this.linha.capitulos, estimativa: this.dados.estimativa,
-      memoriaPorId: this.memoriaPorId,
+      memoriaPorId: this.memoriaPorId, totalDeMemorias: this.dados.memorias.length,
     };
   }
 
@@ -232,9 +251,17 @@ export class TelaDaLinhaDoTempo {
     });
 
     document.addEventListener("click", (e) => {
-      const alvo = (e.target as HTMLElement).closest<HTMLElement>("[data-ir],[data-memoria],[data-ampliar],[data-fechar]");
+      const alvo = (e.target as HTMLElement).closest<HTMLElement>(
+        "[data-ir],[data-memoria],[data-ampliar],[data-fechar],[data-nova-memoria],[data-editar-memoria],[data-capitulo],[data-intencao]",
+      );
       if (!alvo) return;
-      if (alvo.dataset.ir) this.irParaMemoria(alvo.dataset.ir);
+      if (alvo.dataset.novaMemoria) this.pedidos.novaMemoria(alvo.dataset.novaMemoria);
+      else if (alvo.dataset.editarMemoria) {
+        this.el.dialogo.close();
+        this.pedidos.editarMemoria(alvo.dataset.editarMemoria);
+      } else if (alvo.dataset.capitulo) this.pedidos.editarCapitulo(alvo.dataset.capitulo);
+      else if (alvo.dataset.intencao) this.pedidos.editarIntencao(alvo.dataset.intencao);
+      else if (alvo.dataset.ir) this.irParaMemoria(alvo.dataset.ir);
       else if (alvo.dataset.memoria) this.abrirMemoria(alvo.dataset.memoria);
       else if (alvo.dataset.ampliar) this.mudarGranularidade("mes", Number(alvo.dataset.ampliar));
       else if (alvo.hasAttribute("data-fechar")) this.el.dialogo.close();

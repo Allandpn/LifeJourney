@@ -1,8 +1,10 @@
 from datetime import date
 
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, Response, UploadFile, status
+from fastapi.responses import FileResponse
 
-from app.api.dependencias import MemoriasDep, exigir_memorias, juntar_mudancas, obter_ou_404
+from app import fotos
+from app.api.dependencias import ConfigDep, MemoriasDep, exigir_memorias, juntar_mudancas, obter_ou_404
 from app.esquemas import MemoriaDados, MemoriaLida, MemoriaMudancas
 from app.modelos import Memoria
 
@@ -20,6 +22,8 @@ def _ler(memorias: list[Memoria], todas: list[Memoria]) -> list[MemoriaLida]:
         MemoriaLida.model_validate(m).model_copy(update={
             "veio_de": [i for i in m.veio_de if i in ativas],
             "levou_a": levou_a.get(m.id, []),
+            # o nome do arquivo muda a cada envio, o que obriga o navegador a buscar a foto nova
+            "foto": f"/api/memorias/{m.id}/foto?v={m.foto_arquivo.split('-')[-1][:8]}" if m.foto_arquivo else None,
         })
         for m in memorias
     ]
@@ -65,3 +69,45 @@ def alterar_memoria(id: str, mudancas: MemoriaMudancas, memorias: MemoriasDep):
 def excluir_memoria(id: str, memorias: MemoriasDep):
     memorias.excluir(obter_ou_404(memorias, id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@rotas.put("/{id}/foto", response_model=MemoriaLida)
+def enviar_foto(id: str, arquivo: UploadFile, memorias: MemoriasDep, config: ConfigDep):
+    """Envia (ou troca) a foto da memória. Ela é reduzida e perde os metadados (como o local GPS)."""
+    memoria = obter_ou_404(memorias, id)
+    # rota síncrona: o FastAPI a roda em outra thread, e reduzir a foto não trava o servidor
+    conteudo = arquivo.file.read(fotos.TAMANHO_MAXIMO_ENVIO + 1)
+    try:
+        jpeg = fotos.preparar(conteudo)
+    except fotos.FotoInvalida as erro:
+        codigo = status.HTTP_413_CONTENT_TOO_LARGE if len(conteudo) > fotos.TAMANHO_MAXIMO_ENVIO else status.HTTP_422_UNPROCESSABLE_CONTENT
+        raise HTTPException(codigo, str(erro)) from None
+    anterior = memoria.foto_arquivo
+    nome = fotos.gravar(config.pasta_fotos, memorias.usuario_id, memoria.id, jpeg)
+    alterada = memorias.atualizar(memoria, {"foto_arquivo": nome})
+    if anterior:
+        fotos.apagar(config.pasta_fotos, memorias.usuario_id, anterior)
+    return _ler([alterada], memorias.listar())[0]
+
+
+@rotas.get("/{id}/foto", response_class=FileResponse)
+def ler_foto(id: str, memorias: MemoriasDep, config: ConfigDep):
+    """A foto da memória. Só o dono consegue ver."""
+    memoria = obter_ou_404(memorias, id)
+    if not memoria.foto_arquivo:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Esta memória não tem foto.")
+    arquivo = fotos.caminho(config.pasta_fotos, memorias.usuario_id, memoria.foto_arquivo)
+    if not arquivo.exists():
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Arquivo da foto não encontrado.")
+    # "private": só o navegador de quem pediu guarda cópia, nenhum intermediário
+    return FileResponse(arquivo, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=31536000, immutable"})
+
+
+@rotas.delete("/{id}/foto", response_model=MemoriaLida)
+def remover_foto(id: str, memorias: MemoriasDep, config: ConfigDep):
+    memoria = obter_ou_404(memorias, id)
+    anterior = memoria.foto_arquivo
+    alterada = memorias.atualizar(memoria, {"foto_arquivo": None})
+    if anterior:
+        fotos.apagar(config.pasta_fotos, memorias.usuario_id, anterior)
+    return _ler([alterada], memorias.listar())[0]

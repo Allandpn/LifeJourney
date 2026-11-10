@@ -52,6 +52,7 @@ class Memoria(Registro, table=True):
     silenciar: bool = False
     veio_de: list[str] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
     tags: list[str] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    foto_arquivo: str | None = None  # nome do arquivo na pasta de fotos do dono
 
 
 class Capitulo(Registro, table=True):

@@ -100,3 +100,34 @@ def api():
 
 ANA = {"X-Teste-Usuario": "ana"}
 BIA = {"X-Teste-Usuario": "bia"}
+
+
+@pytest.fixture
+def pasta_fotos(tmp_path):
+    """Pasta temporária para as fotos dos testes."""
+    from app.config import Configuracao, obter_configuracao
+
+    pasta = tmp_path / "fotos"
+    aplicacao.dependency_overrides[obter_configuracao] = lambda: Configuracao(
+        modo="desenvolvimento", caminho_banco=tmp_path / "nao-usado.db", pasta_fotos=pasta,
+        email_desenvolvimento="dev@exemplo.local",
+    )
+    return pasta
+
+
+def imagem(largura: int = 3000, altura: int = 2000, formato: str = "JPEG", exif: bool = False) -> bytes:
+    """Uma imagem de teste. Com `exif`, leva uma marca de GPS e uma rotação."""
+    import io
+
+    from PIL import Image
+
+    img = Image.new("RGB", (largura, altura), (200, 80, 60))
+    saida = io.BytesIO()
+    if exif:
+        dados = Image.Exif()
+        dados[0x0112] = 6  # orientação: girar 90°
+        dados[0x8825] = {1: "S", 2: (23.0, 33.0, 0.0)}  # GPS
+        img.save(saida, formato, exif=dados.tobytes())
+    else:
+        img.save(saida, formato)
+    return saida.getvalue()

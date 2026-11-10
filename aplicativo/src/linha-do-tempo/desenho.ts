@@ -2,6 +2,12 @@
 
 import type { Estimativa, Memoria } from "../tipos";
 import { DIA, MESES, MESES_LONGOS, SEMANA, ano, formatarData, formatarNumero, idadeEm, semanaDeVida } from "../tempo";
+
+/** "AAAA-MM-DD" de um instante, no fuso local. */
+function iso(instante: number): string {
+  const d = new Date(instante);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 import {
   type CapituloNaLinha,
   type Granularidade,
@@ -23,6 +29,7 @@ export interface Contexto {
   capitulos: CapituloNaLinha[];
   estimativa: Estimativa | null;
   memoriaPorId: Map<string, Memoria>;
+  totalDeMemorias: number;
 }
 
 const LIMITE_NO_ANO = 3;
@@ -81,8 +88,9 @@ function rotuloDoPeriodo(p: { inicio: number; fim: number }, ctx: Contexto): [st
 function cartaoDeMemoria({ memoria, instante }: MemoriaNaLinha, ctx: Contexto): string {
   const origem = ctx.granularidade !== "ano" && memoria.veio_de.length ? ctx.memoriaPorId.get(memoria.veio_de[0]) : undefined;
   const emocao = memoria.emocao ? `<span class="emocao">${memoria.emocao}</span>` : "";
-  return `<button type="button" class="cartao i${memoria.intensidade}" data-memoria="${memoria.id}" style="--epoca:${corNaData(ctx, instante)}">
-    <span class="texto">${esc(memoria.texto)}</span>
+  const foto = memoria.foto ? `<img class="foto" src="${memoria.foto}" alt="" loading="lazy" decoding="async">` : "";
+  return `<button type="button" class="cartao i${memoria.intensidade}${foto ? " com-foto" : ""}" data-memoria="${memoria.id}" style="--epoca:${corNaData(ctx, instante)}">
+    ${foto}<span class="texto">${esc(memoria.texto)}</span>
     ${origem ? `<span class="origem">depois de: ${esc(origem.texto.slice(0, 46))}${origem.texto.length > 46 ? "…" : ""}</span>` : ""}
     <span class="meta">${emocao}${formatarData(instante)}</span>
   </button>`;
@@ -93,8 +101,8 @@ function cartaoDeIntencao({ intencao, instante }: IntencaoNaLinha): string {
   const quando = h.tipo === "intervalo"
     ? `entre ${h.de.slice(0, 4)} e ${h.ate.slice(0, 4)}`
     : instante !== null ? `${MESES[new Date(instante).getMonth()]} de ${ano(instante)}` : "sem data";
-  return `<div class="intencao"><span class="texto">${esc(intencao.nome)}</span>
-    <span class="meta">${quando} · ${ROTULO_STATUS[intencao.status] ?? intencao.status}</span></div>`;
+  return `<button type="button" class="intencao" data-intencao="${intencao.id}"><span class="texto">${esc(intencao.nome)}</span>
+    <span class="meta">${quando} · ${ROTULO_STATUS[intencao.status] ?? intencao.status}</span></button>`;
 }
 
 function atributosDoFuturo(linha: Linha, ctx: Contexto): { classes: string; estilo: string } {
@@ -121,7 +129,7 @@ export function desenharLinha(linha: Linha, indice: number, ctx: Contexto): stri
       const c = linha.capitulo.capitulo;
       const periodo = `${c.inicio.slice(0, 4)} – ${c.fim ? c.fim.slice(0, 4) : "hoje"}`;
       return `${abre("abertura", ` style="--cap:${corCss(c.cor)}"`)}${espinha(linha, ctx)}
-        <div class="abertura-titulo"><span class="etiqueta">capítulo</span><strong>${esc(c.nome)}</strong></div>
+        <button type="button" class="abertura-titulo" data-capitulo="${c.id}"><span class="etiqueta">capítulo</span><strong>${esc(c.nome)}</strong></button>
         <div class="abertura-anos">${periodo}</div></section>`;
     }
 
@@ -132,7 +140,8 @@ export function desenharLinha(linha: Linha, indice: number, ctx: Contexto): stri
       const texto = linha.futuro
         ? `${rotuloDoIntervalo(linha.inicio, linha.fim, ctx, true)} · ${a0 === a1 ? a0 : `${a0} a ${a1}`} anos`
         : `${rotuloDoIntervalo(linha.inicio, linha.fim, ctx, false)} · nada registrado ainda`;
-      return `${abre("vazio")}${espinha(linha, ctx)}<div class="nota" style="min-height:${altura}px">${texto}</div></section>`;
+      const convite = linha.futuro ? "" : `<button type="button" class="lembrar" data-nova-memoria="${iso((linha.inicio + Math.min(linha.fim, ctx.hoje)) / 2)}">lembrar de algo</button>`;
+      return `${abre("vazio")}${espinha(linha, ctx)}<div class="nota" style="min-height:${altura}px"><span>${texto}</span>${convite}</div></section>`;
     }
 
     case "algumDia":
@@ -153,6 +162,8 @@ export function desenharLinha(linha: Linha, indice: number, ctx: Contexto): stri
           <span class="etiqueta">semana</span>
           <div class="semana">${formatarNumero(semanaDeVida(ctx.nascimento, ctx.hoje))}</div>
           <p>da sua vida · ${idadeEm(ctx.nascimento, ctx.hoje)} anos${capitulos ? ` · ${capitulos}` : ""}</p>${ecos}
+          ${ctx.totalDeMemorias === 0 ? '<hr><p class="convite">Que tal começar por 3 a 5 memórias marcantes? Sem pressa: o resto pode vir aos poucos.</p>' : ""}
+          <div><button type="button" class="botao" data-nova-memoria="${iso(ctx.hoje)}">Registrar algo de hoje</button></div>
         </div>${linha.memorias.map((m) => cartaoDeMemoria(m, ctx)).join("")}</div></section>`;
     }
 
@@ -167,7 +178,9 @@ export function desenharLinha(linha: Linha, indice: number, ctx: Contexto): stri
       let corpo = memorias.map((m) => cartaoDeMemoria(m, ctx)).join("")
         + (resto ? `<button type="button" class="mais" data-ampliar="${linha.periodo.inicio}">+ ${resto} ${resto > 1 ? "memórias" : "memória"} neste ano</button>` : "")
         + linha.intencoes.map(cartaoDeIntencao).join("");
-      if (!linha.memorias.length && !linha.intencoes.length) corpo = '<span class="nota">nada registrado nesta semana</span>';
+      if (!linha.memorias.length && !linha.intencoes.length) {
+        corpo = `<button type="button" class="lembrar" data-nova-memoria="${iso(Math.min(linha.inicio, ctx.hoje))}">registrar algo desta semana</button>`;
+      }
       return `${abre("periodo")}${espinha(linha, ctx, no)}
         <header class="rotulo"><span class="grande">${grande}</span><span class="sub">${sub}</span></header>
         <div class="corpo">${corpo}</div></section>`;
@@ -181,9 +194,10 @@ export function desenharDetalhe(memoria: Memoria, ctx: Contexto, instante: numbe
     ...memoria.veio_de.map((id) => ["veio de", ctx.memoriaPorId.get(id)] as const),
     ...memoria.levou_a.map((id) => ["levou a", ctx.memoriaPorId.get(id)] as const),
   ].filter(([, m]) => m);
-  return `<span class="etiqueta">${formatarData(instante)} · ${idadeEm(ctx.nascimento, instante)} anos · semana ${formatarNumero(semanaDeVida(ctx.nascimento, instante))}${capitulos ? ` · ${capitulos}` : ""}</span>
+  return `${memoria.foto ? `<img class="foto-grande" src="${memoria.foto}" alt="">` : ""}
+    <span class="etiqueta">${formatarData(instante)} · ${idadeEm(ctx.nascimento, instante)} anos · semana ${formatarNumero(semanaDeVida(ctx.nascimento, instante))}${capitulos ? ` · ${capitulos}` : ""}</span>
     <p class="texto-completo">${esc(memoria.texto)}</p>
     <div class="meta">${memoria.emocao ? `<span class="emocao" style="--epoca:${corNaData(ctx, instante)}">${memoria.emocao}</span>` : ""}intensidade ${INTENSIDADE[memoria.intensidade - 1]}${memoria.silenciar ? " · fora de “nesta semana”" : ""}</div>
     ${ligacoes.length ? `<div class="ligacoes">${ligacoes.map(([rotulo, m]) => `<button type="button" data-ir="${m!.id}"><span>${rotulo}</span>${esc(m!.texto)}</button>`).join("")}</div>` : ""}
-    <div class="acoes"><button type="button" class="botao" data-fechar>Fechar</button></div>`;
+    <div class="acoes"><button type="button" class="botao" data-editar-memoria="${memoria.id}">Editar</button><button type="button" class="botao" data-fechar>Fechar</button></div>`;
 }

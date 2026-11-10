@@ -21,6 +21,14 @@
             <button type="button" data-granularidade="semana" aria-pressed="false">Semana</button>
           </div>
           <button type="button" class="botao" id="botao-hoje">Hoje</button>
+          <div class="criar">
+            <button type="button" class="botao principal redondo" id="botao-criar" aria-label="Registrar" aria-haspopup="menu" aria-expanded="false">+</button>
+            <div class="menu-criar" id="menu-criar" role="menu" hidden>
+              <button type="button" role="menuitem" data-criar="memoria">Memória <small>algo que aconteceu</small></button>
+              <button type="button" role="menuitem" data-criar="capitulo">Capítulo <small>uma fase da vida</small></button>
+              <button type="button" role="menuitem" data-criar="intencao">Intenção <small>algo que você quer viver</small></button>
+            </div>
+          </div>
         </div>
         <div class="contexto" id="contexto"></div>
       </div>
@@ -37,6 +45,7 @@
     </aside>
 
     <dialog id="detalhe" aria-label="Memória"><div class="conteudo"></div></dialog>
+    <dialog id="formulario" aria-label="Registrar"></dialog>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

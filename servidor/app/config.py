@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 
 RAIZ_DO_REPOSITORIO = Path(__file__).resolve().parents[2]
 BANCO_PADRAO = RAIZ_DO_REPOSITORIO / "dados-pessoais" / "lifejourney.db"
+FOTOS_PADRAO = RAIZ_DO_REPOSITORIO / "dados-pessoais" / "fotos"
 
 MODOS = ("desenvolvimento", "producao")
 
@@ -22,6 +23,7 @@ MODOS = ("desenvolvimento", "producao")
 class Configuracao:
     modo: str  # "desenvolvimento" ou "producao"
     caminho_banco: Path
+    pasta_fotos: Path
     email_desenvolvimento: str  # usuário usado enquanto o login não existe (etapa 5)
 
     @property
@@ -36,8 +38,10 @@ def obter_configuracao() -> Configuracao:
     if modo not in MODOS:
         raise ValueError(f"LJ_MODO deve ser um de {MODOS}, e não '{modo}'.")
     banco = os.environ.get("LJ_BANCO")
+    fotos = os.environ.get("LJ_FOTOS")
     return Configuracao(
         modo=modo,
         caminho_banco=Path(banco) if banco else BANCO_PADRAO,
+        pasta_fotos=Path(fotos) if fotos else FOTOS_PADRAO,
         email_desenvolvimento=os.environ.get("LJ_EMAIL_DESENVOLVIMENTO", "dev@exemplo.local"),
     )
