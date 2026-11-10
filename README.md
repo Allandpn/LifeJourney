@@ -2,7 +2,7 @@
 
 Aplicativo pessoal que mostra a vida como uma linha do tempo rolável. O passado é um histórico de memórias e capítulos, o presente é a semana atual, e o futuro é um espaço aberto cuja forma vem de uma estimativa de longevidade baseada na tábua de mortalidade do IBGE.
 
-Tudo fica no aparelho do usuário: sem conta, sem servidor.
+O uso principal é no celular. O usuário entra com login, e os dados ficam sincronizados entre os aparelhos por um servidor próprio.
 
 ## Estado atual
 
@@ -25,4 +25,8 @@ Fase de desenho. Existe um protótipo navegável com dados fictícios e esta doc
 
 ## Privacidade
 
-Dados reais de saúde e casos de teste pessoais não entram no repositório. A pasta `dados-pessoais/` está no `.gitignore` para isso.
+Este repositório é público. Por isso:
+
+- dados reais de saúde e casos de teste pessoais não entram nele (a pasta `dados-pessoais/` está no `.gitignore`);
+- senhas, chaves e endereços do servidor ficam em um arquivo `.env`, também fora do git;
+- todos os dados de exemplo são fictícios.

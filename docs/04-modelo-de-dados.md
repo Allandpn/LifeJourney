@@ -3,16 +3,18 @@
 ## Regras gerais
 
 - Toda entidade tem `id` (texto único), `criadoEm` e `atualizadoEm`.
+- Toda entidade pertence a um usuário (`usuarioId`). Hoje há um só, mas o modelo não impede outros.
+- Apagar marca o registro com `excluidoEm` em vez de removê-lo. Assim os outros aparelhos ficam sabendo da exclusão ao sincronizar.
 - **Guardamos datas, não números de semana.** A semana de vida é calculada a partir da data de nascimento. Assim nada precisa ser recalculado se a data de nascimento for corrigida.
 - Datas sem hora usam o formato `AAAA-MM-DD`.
 - Os nomes de campos ficam em português, como no restante do projeto.
 
-## Perfil
-
-Existe um só.
+## Usuário
 
 | Campo | Tipo | Observação |
 |---|---|---|
+| `email` | texto | Usado para entrar |
+| `senhaHash` | texto | A senha nunca é guardada; só um código derivado dela |
 | `nascimento` | data | Obrigatório |
 | `sexo` | `masculino` ou `feminino` | Necessário para a tábua do IBGE |
 | `ultimoBackup` | data e hora | Opcional |
@@ -23,7 +25,7 @@ Existe um só.
 |---|---|---|
 | `data` | data | Obrigatório; não pode ser futura |
 | `texto` | texto | Obrigatório; limite de 280 caracteres (em avaliação) |
-| `foto` | referência a arquivo | Opcional; uma foto por memória na v1 |
+| `foto` | referência a arquivo | Opcional; uma foto por memória na v1. O arquivo fica no servidor, em versão reduzida |
 | `emocao` | texto | Opcional: alegria, calma, orgulho, saudade, tristeza, incerteza |
 | `intensidade` | 1, 2 ou 3 | Leve, média, forte; padrão 2 |
 | `marcante` | sim/não | Memórias marcantes têm prioridade no nível Ano |

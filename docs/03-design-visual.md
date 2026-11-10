@@ -62,4 +62,4 @@ O texto das memórias nunca fica em maiúsculas nem em fonte condensada: ele pre
 - **Intensidade vira tamanho.** Memórias fortes têm texto e foto maiores e um ponto maior na linha.
 - **Sem vermelho ou verde com sentido de certo e errado.** As cores identificam épocas, não julgam.
 - **Movimento discreto.** Cartões entram suavemente ao rolar; nada pisca. Quem pede menos movimento no sistema operacional não vê animações.
-- **Celular.** A linha vai para a esquerda, os cartões ficam em uma coluna e o minimapa fica estreito.
+- **Celular primeiro.** O layout de referência é o do celular: linha à esquerda, cartões em uma coluna, minimapa estreito. No computador, a linha vai para o centro e os cartões alternam de lado.

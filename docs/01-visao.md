@@ -2,7 +2,7 @@
 
 ## O que é
 
-Um aplicativo de uso pessoal que mostra a vida inteira como uma linha do tempo vertical. O usuário rola por ela e vê os marcos de cada período, com fotos e textos curtos.
+Um aplicativo de uso pessoal, pensado primeiro para o celular, que mostra a vida inteira como uma linha do tempo vertical. O usuário rola por ela e vê os marcos de cada período, com fotos e textos curtos.
 
 O sistema tem três objetivos, um para cada parte do tempo:
 
@@ -14,7 +14,7 @@ O sistema tem três objetivos, um para cada parte do tempo:
 
 ## Para quem
 
-Um único usuário (Allan), no próprio aparelho. Não há multiusuário, rede social nem compartilhamento.
+Uma pessoa só, usando principalmente o celular e às vezes o computador. Ela entra com login e vê os mesmos dados em todos os aparelhos. Não há rede social nem compartilhamento entre pessoas.
 
 ## O que o diferencia
 
@@ -35,7 +35,7 @@ Valem para toda decisão de design e de código.
 4. **Fases difíceis têm o mesmo peso que conquistas.** O sistema não força tom positivo.
 5. **Toda pergunta do questionário precisa de um número publicado.** Só entra o que tiver risco relativo de mortalidade vindo de meta-análise ou coorte grande.
 6. **Conservador.** Na dúvida entre dois efeitos, usa-se o menor; o ajuste total tem teto e piso.
-7. **Dados ficam locais.** Sem servidor, sem conta. O backup é manual, em formato aberto.
+7. **Os dados são do usuário.** Ficam em um servidor próprio, atrás de login, e nunca são compartilhados com terceiros. A exportação em formato aberto está sempre disponível.
 8. **Não é aconselhamento médico.** O "e se?" mostra ganhos, nunca perdas, e fica fora da tela principal.
 9. **Sem obrigação diária.** O usuário registra quando algo importa e pode preencher o passado aos poucos.
 
@@ -43,6 +43,7 @@ Valem para toda decisão de design e de código.
 
 ### Dentro
 
+- Login e sincronização entre aparelhos.
 - Data de nascimento e sexo.
 - Linha do tempo rolável com granularidade ano / mês / semana.
 - Memórias com texto, foto, emoção e intensidade.
@@ -52,11 +53,13 @@ Valem para toda decisão de design e de código.
 - Minimapa da vida em semanas.
 - "Nesta semana, em outros anos", com a opção de silenciar uma memória.
 - Questionário de saúde, faixa estimada (percentis 10, 50 e 90) e "e se?".
-- Armazenamento local e backup por exportação e importação.
+- Backup por exportação e importação.
+- Instalação no celular como aplicativo (PWA).
 
 ### Fora
 
-- Conta, login, servidor, sincronização entre aparelhos.
+- Cadastro aberto a outras pessoas (o login existe, mas a conta é criada pelo dono do servidor).
+- Registrar memórias sem conexão (na v1, sem internet o aplicativo só mostra o que já foi carregado).
 - Componente social.
 - Recursos de IA.
 - Vídeo, áudio e música nas memórias.

@@ -3,3 +3,8 @@ dados-pessoais/
 *.local.json
 node_modules/
 .idea/
+.env
+*.db
+__pycache__/
+.venv/
+dist/

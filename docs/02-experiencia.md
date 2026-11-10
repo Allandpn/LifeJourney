@@ -64,6 +64,7 @@ Uma faixa fixa na lateral mostra a vida inteira como grade de semanas (52 coluna
 
 | Tela | Conteúdo |
 |---|---|
+| Entrar | E-mail e senha. O aparelho continua conectado até o usuário sair. |
 | Primeiro acesso | Pede só a data de nascimento e o sexo. A linha aparece na hora, vazia. Convite opcional para registrar de 3 a 5 memórias marcantes. |
 | Linha do tempo | A tela principal, descrita acima. |
 | Detalhe da memória | Foto, texto, data, idade, semana, capítulo, emoção, ligações "veio de / levou a", silenciar. |
@@ -72,6 +73,17 @@ Uma faixa fixa na lateral mostra a vida inteira como grade de semanas (52 coluna
 | Criar ou editar intenção | Nome, horizonte (data, intervalo ou "algum dia"), status, notas. |
 | Questionário e "e se?" | Perguntas de saúde, faixa resultante e ganho de cada mudança de hábito. Tela separada e opcional. |
 | Backup | Onde os dados ficam, exportar, importar e a data do último backup. |
+| Conta | Trocar a senha e sair. |
+
+## Celular primeiro
+
+O desenho parte da tela do celular e se expande para o computador, não o contrário.
+
+- A linha fica à esquerda e os cartões em uma coluna.
+- Os controles principais ficam ao alcance do polegar.
+- O minimapa é uma faixa estreita na lateral, usada com o dedo.
+- Fotos são tiradas ou escolhidas direto da galeria do celular.
+- O aplicativo é instalado pela opção "adicionar à tela inicial" e abre em tela cheia.
 
 ## Tom dos textos
 
