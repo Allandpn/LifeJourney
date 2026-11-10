@@ -132,11 +132,17 @@ O sistema guarda memórias pessoais e respostas de saúde de mais de uma pessoa,
 
 ### Contas e acesso
 
-- **Contas por convite.** Não há cadastro aberto. O administrador gera um link que vale poucos dias e cria uma conta só.
-- **Senha nunca guardada**, só o código derivado (Argon2). Senha mínima de 10 caracteres.
-- **Tentativas de login limitadas** por conta e por endereço, para barrar adivinhação de senha.
-- **Sessão em cookie protegido** (`HttpOnly`, `Secure`, `SameSite`). O usuário vê os aparelhos conectados e pode desconectar qualquer um.
-- **Redefinição de senha** por link gerado pelo administrador, já que a v1 não envia e-mails.
+- **Contas por convite.** Não há cadastro aberto. O administrador gera um link que vale 7 dias e cria uma conta só. O primeiro administrador é criado por comando no servidor (`python -m app.contas criar-admin`).
+- **Senha nunca guardada**, só o hash Argon2. Mínimo de 10 e máximo de 128 caracteres.
+- **Códigos nunca guardados.** Sessões, convites e links de senha nova são códigos aleatórios de 256 bits; o banco guarda só o SHA-256 deles. Quem copiar o banco não consegue usá-los.
+- **Tentativas limitadas:** 5 erros de senha por conta e 20 por endereço a cada 15 minutos (vale também para a senha atual, ao trocar a senha); 20 tentativas de código de convite ou de senha nova por endereço.
+- **Resposta igual para e-mail inexistente e senha errada**, com o mesmo tempo de resposta, para ninguém descobrir quem tem conta.
+- **Sessão em cookie** `HttpOnly` (o JavaScript não lê), `SameSite=Lax` (outros sites não enviam) e, em produção, `Secure` (só HTTPS). Vale 90 dias. O usuário vê os aparelhos conectados e pode desconectar qualquer um.
+- **Pedidos de outros sites recusados:** em pedidos que alteram dados, a origem precisa ser o próprio site. É uma segunda barreira além do `SameSite`.
+- **Trocar a senha desconecta os outros aparelhos; redefinir desconecta todos.**
+- **Redefinição de senha** por link gerado pelo administrador (vale 1 dia e uma vez), já que a v1 não envia e-mails. O link chega como `#redefinir-...` no endereço, parte que o navegador não envia ao servidor nem a outros sites; o aplicativo apaga essa parte do histórico assim que lê.
+- **Cabeçalhos de segurança** nas respostas da API: sem cache de dados pessoais, sem ser exibida dentro de outros sites.
+- **Em produção:** sem a documentação automática da API, e o servidor não liga se a conta de desenvolvimento ainda tiver a senha conhecida.
 
 ### Isolamento entre contas
 
@@ -149,7 +155,19 @@ O sistema guarda memórias pessoais e respostas de saúde de mais de uma pessoa,
 
 Quem administra o Pi tem acesso físico ao banco de dados. Pelo aplicativo, o administrador não vê dados de outras contas, mas tecnicamente poderia abrir o arquivo do banco.
 
-Na v1 isso é tratado com transparência: a tela de criação de conta avisa quem administra o servidor. Impedir esse acesso de verdade exige cifrar os dados com a senha de cada usuário, o que complica a redefinição de senha e o cálculo no servidor. Fica como candidato a v2.
+Além disso, o administrador pode gerar um link de senha nova para qualquer conta, ou seja, pode entrar nela. A pessoa perceberia: todos os aparelhos dela seriam desconectados e a senha antiga pararia de funcionar.
+
+Na v1 isso é tratado com transparência: a tela de criação de conta avisa que os dados ficam num servidor cuidado por quem convidou, e que essa pessoa tecnicamente pode abrir o banco. Impedir esse acesso de verdade exige cifrar os dados com a senha de cada usuário, o que complica a redefinição de senha e o cálculo no servidor. Fica como candidato a v2.
+
+### Limites conhecidos (revisão de segurança da etapa 5)
+
+| Limite | Consequência | Quando resolver |
+|---|---|---|
+| Atrás do túnel da Cloudflare, todo pedido parece vir do próprio Pi | O limite de 20 tentativas por endereço vira um limite único para todos | Etapa 7: usar o endereço real que a Cloudflare informa |
+| O limite por conta pode ser usado para bloquear alguém | Errar a senha de outra pessoa 5 vezes impede que ela entre por 15 minutos | Aceito: é melhor que permitir adivinhação |
+| As contagens de tentativas ficam na memória do servidor | Reiniciar o servidor zera as contagens | Aceito para um servidor de um processo só |
+| Sessões vencidas continuam no banco | Ocupam espaço; não dão acesso | Limpeza periódica na etapa 7 |
+| A página do aplicativo ainda não tem cabeçalhos de segurança (CSP) | Hoje é servida pelo Vite, só em desenvolvimento | Etapa 7, quando o servidor passar a servir a página |
 
 ### Dados em repouso e em trânsito
 

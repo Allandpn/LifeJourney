@@ -28,7 +28,9 @@ Registro curto do que foi decidido e do que falta decidir. Decisões tomadas nã
 | 100% local, sem conta e sem servidor | Servidor próprio com login | Memórias e respostas de saúde passam a ficar em um servidor. Exige hospedagem, HTTPS e cuidado com senhas. A exportação em formato aberto continua |
 | TypeScript em tudo | Python no servidor e no cálculo; TypeScript só na tela | Duas linguagens no projeto |
 
-| Até a etapa 5, um usuário de desenvolvimento, só em modo desenvolvimento | Permite testar a API antes do login; em produção o servidor recusa tudo |
+| Contas criadas por link de convite | Sem cadastro aberto num servidor exposto à internet |
+| Redefinição de senha por link gerado pelo administrador | A v1 não envia e-mails |
+| Sessão em cookie, com o código guardado só como hash no servidor | Permite listar e desconectar aparelhos; o JavaScript não lê o cookie |
 | Exclusão por marcação (`excluido_em`) | Outros aparelhos ficam sabendo da exclusão |
 | Fotos regravadas em JPEG de até 1600 px, sem metadados | Economiza espaço no Raspberry Pi e remove o local GPS e o modelo do celular |
 | Excluir pede um segundo toque, sem janela de confirmação | Evita exclusão por engano sem interromper |
@@ -41,12 +43,10 @@ Registro curto do que foi decidido e do que falta decidir. Decisões tomadas nã
 | Servidor com FastAPI, SQLModel e SQLite | Serviço pronto de login e banco (por exemplo Supabase), com Python só no cálculo |
 | Aplicativo web instalável (PWA) em TypeScript, sem framework | Aplicativo nativo para Android |
 | Sincronização direta na v1: precisa de internet para registrar | Registrar sem conexão e enviar depois (mais complexo) |
-| Contas criadas por link de convite | Cadastro aberto a qualquer pessoa |
 | Docker Compose no Raspberry Pi | Rodar direto no sistema, como serviço |
 | Cloudflare Tunnel para acesso externo, com domínio próprio | Abrir porta no roteador com Caddy e DNS dinâmico; ou Tailscale, só para aparelhos autorizados |
 | Banco e fotos em SSD externo cifrado, com cópia noturna cifrada para fora do Pi | Cartão SD, sem cópia |
 | Na v1, o administrador pode tecnicamente abrir o banco; a tela de cadastro avisa | Cifrar os dados com a senha de cada usuário (v2) |
-| Redefinição de senha por link gerado pelo administrador | Envio de e-mail |
 | O passado é o centro; a estimativa só dá forma ao futuro | Estimativa em destaque na tela principal |
 | Emoção e intensidade entram na v1 | Deixar para depois |
 | Campo `principal` no capítulo define a cor da época | Usar sempre o capítulo mais antigo em andamento |

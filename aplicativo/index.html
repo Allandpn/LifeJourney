@@ -29,12 +29,14 @@
               <button type="button" role="menuitem" data-criar="intencao">Intenção <small>algo que você quer viver</small></button>
             </div>
           </div>
+          <button type="button" class="botao redondo conta-botao" id="botao-conta" aria-label="Conta">·</button>
         </div>
         <div class="contexto" id="contexto"></div>
       </div>
     </header>
 
     <p class="aviso" id="aviso" role="alert" hidden></p>
+    <section id="acesso" hidden></section>
     <section id="boas-vindas" hidden></section>
 
     <div class="rolagem"><main class="linha-do-tempo" id="linha"></main></div>
@@ -46,6 +48,7 @@
 
     <dialog id="detalhe" aria-label="Memória"><div class="conteudo"></div></dialog>
     <dialog id="formulario" aria-label="Registrar"></dialog>
+    <dialog id="conta" aria-label="Conta"></dialog>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

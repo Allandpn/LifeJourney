@@ -2,7 +2,8 @@
 
 Rode, dentro da pasta `servidor`:  python -m app.exemplo
 Use `--substituir` para apagar o que já existe na conta de desenvolvimento antes.
-Só funciona em modo desenvolvimento.
+Só funciona em modo desenvolvimento. A conta de desenvolvimento é administradora e
+usa a senha SENHA_DE_DESENVOLVIMENTO, que só serve na sua máquina.
 """
 
 from __future__ import annotations
@@ -16,6 +17,9 @@ from app.banco import criar_tabelas, obter_motor
 from app.config import obter_configuracao
 from app.modelos import Capitulo, Intencao, Memoria, Usuario, agora
 from app.repositorio import Repositorio
+from app.seguranca import hash_da_senha
+
+SENHA_DE_DESENVOLVIMENTO = "vida-em-semanas"
 
 CAPITULOS = [
     ("Infância em Olinda", "1990-03-14", "2001-01-31", "menta", True),
@@ -136,9 +140,12 @@ def main(argumentos: list[str]) -> int:
         usuario = sessao.exec(select(Usuario).where(Usuario.email == config.email_desenvolvimento)).first()
         if usuario is None:
             usuario = Usuario(email=config.email_desenvolvimento)
-            sessao.add(usuario)
-            sessao.commit()
-            sessao.refresh(usuario)
+        if not usuario.senha_hash:
+            usuario.senha_hash = hash_da_senha(SENHA_DE_DESENVOLVIMENTO)
+        usuario.administrador = True
+        sessao.add(usuario)
+        sessao.commit()
+        sessao.refresh(usuario)
         if Repositorio(sessao, usuario.id, Memoria).listar():
             if "--substituir" not in argumentos:
                 print(f"A conta {usuario.email} já tem memórias. Use --substituir para apagá-las e recriar.")
@@ -148,6 +155,7 @@ def main(argumentos: list[str]) -> int:
         email = usuario.email
     print(f"Vida de exemplo criada para {email}: "
           f"{criados['memorias']} memórias, {criados['capitulos']} capítulos, {criados['intencoes']} intenções.")
+    print(f"Entre no aplicativo com {email} e a senha {SENHA_DE_DESENVOLVIMENTO}")
     return 0
 
 

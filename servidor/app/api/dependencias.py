@@ -2,45 +2,64 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from datetime import timedelta
+
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from sqlmodel import Session, select
 
 from app.banco import obter_sessao
 from app.config import Configuracao, obter_configuracao
-from app.modelos import Capitulo, Intencao, Memoria, Usuario
+from app.modelos import Capitulo, Intencao, Memoria, Sessao, Usuario, agora, em_utc
 from app.repositorio import NaoEncontrado, Repositorio
-
-log = logging.getLogger(__name__)
+from app.seguranca import hash_do_codigo
 
 SessaoDep = Annotated[Session, Depends(obter_sessao)]
 ConfigDep = Annotated[Configuracao, Depends(obter_configuracao)]
 
 
-def usuario_atual(sessao: SessaoDep, config: ConfigDep) -> Usuario:
-    """Quem está fazendo a requisição.
+NOME_DO_COOKIE = "lj_sessao"
 
-    Até a etapa 5 (login) não há senha: em modo desenvolvimento, toda requisição
-    é do usuário de desenvolvimento, criado na primeira vez. Em produção, tudo é
-    recusado, para o servidor nunca ir ao ar sem login por engano.
-    """
-    if not config.desenvolvimento:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "O login ainda não foi implementado.")
-    usuario = sessao.exec(select(Usuario).where(Usuario.email == config.email_desenvolvimento)).first()
-    if usuario is None:
-        usuario = Usuario(email=config.email_desenvolvimento)
-        sessao.add(usuario)
+
+def sessao_atual(request: Request, sessao: SessaoDep) -> Sessao:
+    """A sessão do aparelho que fez a requisição, pelo cookie. Sem sessão válida: 401."""
+    codigo = request.cookies.get(NOME_DO_COOKIE)
+    registro = None
+    if codigo:
+        registro = sessao.exec(select(Sessao).where(Sessao.codigo_hash == hash_do_codigo(codigo))).first()
+    if registro is None or em_utc(registro.expira_em) <= agora():
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Entre na sua conta para continuar.")
+    # registra o uso no máximo uma vez por hora, para não gravar no banco a cada clique
+    if agora() - em_utc(registro.ultimo_uso) > timedelta(hours=1):
+        registro.ultimo_uso = agora()
+        sessao.add(registro)
         sessao.commit()
-        sessao.refresh(usuario)
-        log.warning("Usuário de desenvolvimento criado: %s", usuario.email)
+    return registro
+
+
+SessaoAtualDep = Annotated[Sessao, Depends(sessao_atual)]
+
+
+def usuario_atual(registro: SessaoAtualDep, sessao: SessaoDep) -> Usuario:
+    usuario = sessao.get(Usuario, registro.usuario_id)
+    if usuario is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Entre na sua conta para continuar.")
     return usuario
 
 
 UsuarioDep = Annotated[Usuario, Depends(usuario_atual)]
+
+
+def administrador(usuario: UsuarioDep) -> Usuario:
+    if not usuario.administrador:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Só o administrador pode fazer isso.")
+    return usuario
+
+
+AdministradorDep = Annotated[Usuario, Depends(administrador)]
 
 
 def _repositorio(modelo):

@@ -1,7 +1,8 @@
 // Conversa com o servidor. Todas as chamadas passam por aqui.
 
 import type {
-  Capitulo, CapituloDados, Estimativa, Intencao, IntencaoDados, Memoria, MemoriaDados, Perfil, Sexo,
+  Capitulo, CapituloDados, Conta, Convite, Estimativa, Intencao, IntencaoDados, LinkGerado, Memoria, MemoriaDados,
+  Perfil, SessaoConectada, Sexo,
 } from "./tipos";
 
 export class ErroDaApi extends Error {
@@ -25,6 +26,14 @@ function mensagemDeErro(status: number, corpo: unknown): string {
   return `Erro ${status}.`;
 }
 
+/** Chamado quando a sessão acaba no meio do uso (saiu em outro aparelho, trocou a senha...). */
+let aoPerderSessao: () => void = () => {};
+export function quandoPerderSessao(acao: () => void): void {
+  aoPerderSessao = acao;
+}
+// nestas rotas, 401 é uma resposta normal (senha errada, ou ainda não entrou)
+const ROTAS_SEM_SESSAO = new Set(["/api/entrar", "/api/conta"]);
+
 async function pedir<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
   const ehJson = typeof opcoes.body === "string";
   let resposta: Response;
@@ -44,6 +53,7 @@ async function pedir<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
     } catch {
       // a resposta não era JSON
     }
+    if (resposta.status === 401 && !ROTAS_SEM_SESSAO.has(caminho)) aoPerderSessao();
     throw new ErroDaApi(resposta.status, mensagemDeErro(resposta.status, corpo));
   }
   return resposta.status === 204 ? (undefined as T) : resposta.json();
@@ -61,6 +71,24 @@ function crud<Lido, Dados>(base: string) {
 }
 
 export const api = {
+  conta: () => pedir<Conta>("/api/conta"),
+  entrar: (email: string, senha: string) => pedir<Conta>("/api/entrar", json("POST", { email, senha })),
+  sair: () => pedir<void>("/api/sair", { method: "POST" }),
+  criarConta: (codigo: string, email: string, senha: string) =>
+    pedir<Conta>("/api/contas", json("POST", { codigo, email, senha })),
+  redefinirSenha: (codigo: string, senha_nova: string) =>
+    pedir<void>("/api/redefinir-senha", json("POST", { codigo, senha_nova })),
+  trocarSenha: (senha_atual: string, senha_nova: string) =>
+    pedir<void>("/api/conta/senha", json("POST", { senha_atual, senha_nova })),
+  sessoes: () => pedir<SessaoConectada[]>("/api/conta/sessoes"),
+  desconectar: (id: string) => pedir<void>(`/api/conta/sessoes/${id}`, { method: "DELETE" }),
+  admin: {
+    criarConvite: () => pedir<LinkGerado>("/api/admin/convites", { method: "POST" }),
+    convites: () => pedir<Convite[]>("/api/admin/convites"),
+    cancelarConvite: (id: string) => pedir<void>(`/api/admin/convites/${id}`, { method: "DELETE" }),
+    criarRedefinicao: (email: string) => pedir<LinkGerado>("/api/admin/redefinicoes", json("POST", { email })),
+  },
+
   perfil: () => pedir<Perfil>("/api/perfil"),
   salvarPerfil: (nascimento: string, sexo: Sexo) => pedir<Perfil>("/api/perfil", json("PUT", { nascimento, sexo })),
   estimativa: () => pedir<Estimativa>("/api/estimativa"),

@@ -28,6 +28,14 @@
 | `validoAte` | data e hora | Expira em poucos dias |
 | `usadoPor` | id de usuário | Cada convite cria uma conta só |
 
+## Redefinição de senha
+
+| Campo | Tipo | Observação |
+|---|---|---|
+| `codigo` | texto aleatório | Vai no link; guardado só como código derivado |
+| `validoAte` | data e hora | Um dia |
+| `usadoEm` | data e hora | Cada link vale uma vez |
+
 ## Sessão
 
 Um registro por aparelho conectado. Permite listar os aparelhos e desconectar um deles.
@@ -91,6 +99,12 @@ A implementação está em `servidor/app/modelos.py` (tabelas) e `servidor/app/e
 
 | Rota | Faz |
 |---|---|
+| `POST /api/entrar` e `POST /api/sair` | Abre e fecha a sessão deste aparelho |
+| `POST /api/contas` | Cria conta com um código de convite |
+| `POST /api/redefinir-senha` | Cria senha nova com um link do administrador |
+| `GET /api/conta`, `POST /api/conta/senha` | Quem está logado; trocar a senha |
+| `GET /api/conta/sessoes`, `DELETE /api/conta/sessoes/{id}` | Aparelhos conectados; desconectar um |
+| `/api/admin/convites`, `POST /api/admin/redefinicoes` | Só administrador: convites e links de senha nova |
 | `GET` / `PUT /api/perfil` | Lê e grava nascimento e sexo |
 | `GET /api/memorias` | Lista em ordem de data; aceita `?de=` e `?ate=` |
 | `POST /api/memorias` | Cria |

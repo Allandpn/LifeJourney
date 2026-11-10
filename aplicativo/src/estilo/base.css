@@ -96,6 +96,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 /* ---------- boas-vindas ---------- */
+body[data-tela="acesso"] .cabecalho,
+body[data-tela="acesso"] .minimapa,
 body[data-tela="boas-vindas"] .cabecalho,
 body[data-tela="boas-vindas"] .minimapa,
 body[data-tela="carregando"] .minimapa { display: none; }
@@ -137,6 +139,11 @@ body[data-tela="carregando"] .minimapa { display: none; }
 .boas-vindas fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
 .boas-vindas legend { width: 100%; margin-bottom: 6px; }
 .boas-vindas .opcao { display: flex; align-items: center; gap: 8px; font-family: var(--fonte-texto); font-size: 1rem; letter-spacing: 0; text-transform: none; color: var(--texto); }
+.boas-vindas small { font-family: var(--fonte-texto); letter-spacing: 0; text-transform: none; font-size: 0.8rem; }
+.boas-vindas .ajuda { font-size: 0.88rem; }
+.boas-vindas .aviso-servidor { font-size: 0.88rem; border-left: 2px solid var(--destaque-2); padding-left: 12px; }
+.boas-vindas input[type="email"],
+.boas-vindas input[type="password"],
 .boas-vindas input[type="date"] {
   font: inherit;
   font-family: var(--fonte-texto);

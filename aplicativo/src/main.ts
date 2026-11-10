@@ -1,14 +1,18 @@
 import "./estilo/base.css";
 import "./estilo/linha-do-tempo.css";
 import "./estilo/formularios.css";
-import { api, ErroDaApi } from "./api";
+import { api, ErroDaApi, quandoPerderSessao } from "./api";
 import { type Dados, TelaDaLinhaDoTempo } from "./linha-do-tempo/tela";
+import { telaDeCriarConta, telaDeEntrar, telaDeRedefinir } from "./telas/acesso";
 import { mostrarBoasVindas } from "./telas/boas-vindas";
+import { abrirConta } from "./telas/conta";
+import type { Conta } from "./tipos";
 import { formularioDeCapitulo, formularioDeIntencao, formularioDeMemoria, hojeIso } from "./telas/formularios";
 
 const $ = <T extends HTMLElement>(seletor: string) => document.querySelector<T>(seletor)!;
 
 let tela: TelaDaLinhaDoTempo | null = null;
+let conta: Conta | null = null;
 let dados: Dados | null = null;
 
 function mostrarAviso(texto: string): void {
@@ -77,7 +81,35 @@ function ligarMenuDeCriar(): void {
   document.addEventListener("keydown", (e) => e.key === "Escape" && fechar());
 }
 
+/** Volta ao começo (tela de entrar), sem o link de convite ou de senha no endereço. */
+function recomecar(): void {
+  history.replaceState(null, "", location.pathname);
+  location.reload();
+}
+
 async function iniciar(): Promise<void> {
+  // links de convite e de senha nova chegam como "#convite-<código>" e "#redefinir-<código>"
+  const [, tipo, codigo] = location.hash.match(/^#(convite|redefinir)-(.+)$/) ?? [];
+  const acesso = $("#acesso");
+  if (tipo) {
+    document.body.dataset.tela = "acesso";
+    history.replaceState(null, "", location.pathname); // o código não fica no histórico do navegador
+    if (tipo === "convite") telaDeCriarConta(acesso, codigo, () => void iniciar().catch(tratarErro));
+    else telaDeRedefinir(acesso, codigo, () => telaDeEntrar(acesso, () => void iniciar().catch(tratarErro)));
+    return;
+  }
+  try {
+    conta = await api.conta();
+  } catch (erro) {
+    if (erro instanceof ErroDaApi && erro.status === 401) {
+      document.body.dataset.tela = "acesso";
+      telaDeEntrar(acesso, () => void iniciar().catch(tratarErro));
+      return;
+    }
+    throw erro;
+  }
+  $("#botao-conta").textContent = conta.email.slice(0, 1).toUpperCase();
+
   const perfil = await api.perfil();
   if (!perfil.nascimento || !perfil.sexo) {
     document.body.dataset.tela = "boas-vindas";
@@ -106,12 +138,18 @@ async function iniciar(): Promise<void> {
 }
 
 function tratarErro(erro: unknown): void {
-  if (erro instanceof ErroDaApi && erro.status === 0) {
+  if (erro instanceof ErroDaApi && erro.status === 401) {
+    recomecar(); // a sessão acabou (saiu em outro aparelho, trocou a senha): volta para entrar
+  } else if (erro instanceof ErroDaApi && erro.status === 0) {
     mostrarAviso("Sem conexão com o servidor. Confira se ele está ligado e recarregue a página.");
   } else {
     mostrarAviso(erro instanceof Error ? erro.message : "Algo deu errado ao carregar a linha do tempo.");
   }
 }
 
+quandoPerderSessao(recomecar);
 ligarMenuDeCriar();
+$("#botao-conta").addEventListener("click", () => {
+  if (conta) void abrirConta($<HTMLDialogElement>("#conta"), conta, recomecar);
+});
 iniciar().catch(tratarErro);

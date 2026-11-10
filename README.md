@@ -6,14 +6,15 @@ O uso principal é no celular. Cada pessoa tem a própria conta, e os dados fica
 
 ## Estado atual
 
-Etapas 0 a 4 do [roteiro](docs/07-roteiro.md) concluídas:
+Etapas 0 a 5 do [roteiro](docs/07-roteiro.md) concluídas:
 
 - o servidor em Python e o aplicativo em TypeScript existem, se conversam e têm testes;
 - o núcleo de cálculo (`servidor/app/nucleo/`) estima a faixa de vida e o "e se?", com a tábua provisória e todos os números em [`servidor/dados/fatores.json`](servidor/dados/fatores.json).
 
 - o aplicativo mostra a linha do tempo do protótipo, lendo da API: rolagem com granularidade ano, mês e semana, capítulos, "Hoje", futuro com a faixa estimada e minimapa;
 - pelo aplicativo dá para criar, editar e excluir memórias (com foto e ligação "veio de"), capítulos e intenções;
-- a API grava e devolve memórias, capítulos, intenções e o perfil, num banco SQLite, com cada registro isolado por dono. O login ainda não existe (etapa 5): em modo desenvolvimento, tudo é gravado para um usuário de desenvolvimento.
+- a API grava e devolve memórias, capítulos, intenções e o perfil, num banco SQLite, com cada registro isolado por dono;
+- cada pessoa tem a sua conta, criada por convite do administrador, com login, troca de senha e lista de aparelhos conectados.
 
 Os números ainda são provisórios: as médias brasileiras são placeholders e a calibração está pendente (ver [Modelo de cálculo](docs/05-modelo-de-calculo.md)).
 
@@ -45,6 +46,14 @@ Para preencher a conta de desenvolvimento com uma vida fictícia (a mesma do pro
 
 ```powershell
 .venv\Scripts\python -m app.exemplo
+```
+
+Ela cria a conta `dev@exemplo.local`, administradora, com a senha `vida-em-semanas`. Essa senha só serve no seu computador: o servidor em modo produção se recusa a ligar enquanto ela existir.
+
+Para criar a sua conta de administrador de verdade (a senha é pedida no terminal):
+
+```powershell
+.venv\Scripts\python -m app.contas criar-admin voce@exemplo.com
 ```
 
 Para ver o cálculo com um perfil fictício:
@@ -82,7 +91,7 @@ npm run dev
 
 Com o servidor ligado, a página mostra "Servidor no ar".
 
-Para experimentar a API, abra http://127.0.0.1:8000/docs com o servidor ligado: cada rota tem o botão "Try it out". O banco fica em `dados-pessoais/lifejourney.db` e as fotos em `dados-pessoais/fotos/`; para recomeçar do zero, apague os dois.
+Para experimentar a API, abra http://127.0.0.1:8000/docs com o servidor ligado: entre primeiro pela rota `POST /api/entrar`, e o navegador guarda o cookie para as outras. Em modo produção essa página não existe. O banco fica em `dados-pessoais/lifejourney.db` e as fotos em `dados-pessoais/fotos/`; para recomeçar do zero, apague os dois.
 
 Enquanto não houver ferramenta de migração (antes da etapa 7), quando uma etapa muda as tabelas é preciso apagar o banco de desenvolvimento e rodar `python -m app.exemplo` de novo. A etapa 4 mudou a tabela de memórias. Para ver no celular, conecte-o à mesma rede Wi-Fi e abra o endereço "Network" que o `npm run dev` mostra.
 

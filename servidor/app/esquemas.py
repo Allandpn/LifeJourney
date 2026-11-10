@@ -184,3 +184,67 @@ class IntencaoMudancas(Esquema):
 
 class IntencaoLida(Lido, IntencaoDados):
     model_config = ConfigDict(from_attributes=True, extra="ignore")
+
+
+# ---------- Contas ----------
+
+Email = Annotated[str, StringConstraints(strip_whitespace=True, to_lower=True, min_length=3, max_length=254,
+                                         pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+Senha = Annotated[str, StringConstraints(min_length=10, max_length=128)]
+
+
+class Entrada(Esquema):
+    email: Annotated[str, StringConstraints(strip_whitespace=True, to_lower=True, max_length=254)]
+    senha: Annotated[str, StringConstraints(max_length=128)]
+
+
+class NovaConta(Esquema):
+    codigo: Annotated[str, StringConstraints(max_length=100)]
+    email: Email
+    senha: Senha
+
+
+class TrocaDeSenha(Esquema):
+    senha_atual: Annotated[str, StringConstraints(max_length=128)]
+    senha_nova: Senha
+
+
+class SenhaRedefinida(Esquema):
+    codigo: Annotated[str, StringConstraints(max_length=100)]
+    senha_nova: Senha
+
+
+class ContaLida(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    email: str
+    administrador: bool
+
+
+class SessaoLida(BaseModel):
+    id: str
+    aparelho: str
+    criado_em: datetime
+    ultimo_uso: datetime
+    esta: bool  # é a sessão deste aparelho
+
+
+class ConviteLido(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    criado_em: datetime
+    valido_ate: datetime
+    usado: bool
+    cancelado: bool
+
+
+class LinkGerado(BaseModel):
+    """O link só é mostrado uma vez: o servidor não guarda o código."""
+
+    caminho: str  # ex.: "/#convite-abc..." (o aplicativo junta com o endereço do site)
+    valido_ate: datetime
+
+
+class PedidoDeRedefinicao(Esquema):
+    email: Annotated[str, StringConstraints(strip_whitespace=True, to_lower=True, max_length=254)]

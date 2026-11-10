@@ -22,15 +22,55 @@ def agora() -> datetime:
     return datetime.now(UTC)
 
 
+def em_utc(momento: datetime) -> datetime:
+    """O SQLite devolve datas sem fuso; todas foram gravadas em UTC."""
+    return momento if momento.tzinfo else momento.replace(tzinfo=UTC)
+
+
 class Usuario(SQLModel, table=True):
     id: str = Field(default_factory=novo_id, primary_key=True)
     email: str = Field(unique=True, index=True)
-    senha_hash: str | None = None  # preenchido a partir da etapa 5 (login)
+    senha_hash: str | None = None  # hash Argon2; sem senha, a conta não consegue entrar
     administrador: bool = False
     nascimento: date | None = None
     sexo: str | None = None  # "masculino" ou "feminino"
     ultimo_backup: datetime | None = None
     criado_em: datetime = Field(default_factory=agora)
+
+
+class Sessao(SQLModel, table=True):
+    """Um aparelho conectado. O cookie do aparelho tem o código; aqui fica só o hash."""
+
+    id: str = Field(default_factory=novo_id, primary_key=True)  # usado para listar e desconectar
+    codigo_hash: str = Field(unique=True, index=True)
+    usuario_id: str = Field(foreign_key="usuario.id", index=True)
+    aparelho: str = ""
+    criado_em: datetime = Field(default_factory=agora)
+    ultimo_uso: datetime = Field(default_factory=agora)
+    expira_em: datetime
+
+
+class Convite(SQLModel, table=True):
+    """Link para criar uma conta. Vale uma vez, por poucos dias."""
+
+    id: str = Field(default_factory=novo_id, primary_key=True)
+    codigo_hash: str = Field(unique=True, index=True)
+    criado_por: str = Field(foreign_key="usuario.id")
+    criado_em: datetime = Field(default_factory=agora)
+    valido_ate: datetime
+    usado_por: str | None = Field(default=None, foreign_key="usuario.id")
+    cancelado_em: datetime | None = None
+
+
+class Redefinicao(SQLModel, table=True):
+    """Link para criar senha nova, gerado pelo administrador. Vale uma vez, por um dia."""
+
+    id: str = Field(default_factory=novo_id, primary_key=True)
+    codigo_hash: str = Field(unique=True, index=True)
+    usuario_id: str = Field(foreign_key="usuario.id")
+    criado_em: datetime = Field(default_factory=agora)
+    valido_ate: datetime
+    usado_em: datetime | None = None
 
 
 class Registro(SQLModel):

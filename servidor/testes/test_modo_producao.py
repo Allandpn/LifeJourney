@@ -1,16 +1,11 @@
-"""Enquanto não há login, o servidor em modo produção recusa tudo."""
+"""Sem login, nada é devolvido, em qualquer modo."""
 
 from fastapi.testclient import TestClient
 
-from app.config import Configuracao, obter_configuracao
 from app.principal import app
 
 
-def test_producao_sem_login_recusa_requisicoes(tmp_path):
-    app.dependency_overrides[obter_configuracao] = lambda: Configuracao(
-        modo="producao", caminho_banco=tmp_path / "x.db", pasta_fotos=tmp_path, email_desenvolvimento="dev@exemplo.local"
-    )
-    try:
-        assert TestClient(app).get("/api/memorias").status_code == 401
-    finally:
-        app.dependency_overrides.clear()
+def test_sem_login_as_rotas_de_dados_recusam():
+    cliente = TestClient(app)
+    for rota in ("/api/memorias", "/api/capitulos", "/api/intencoes", "/api/perfil", "/api/estimativa", "/api/conta"):
+        assert cliente.get(rota).status_code == 401, rota

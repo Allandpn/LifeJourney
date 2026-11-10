@@ -5,6 +5,32 @@ export type Emocao = "alegria" | "calma" | "orgulho" | "saudade" | "tristeza" | 
 export type CorCapitulo = "menta" | "azul" | "ambar" | "laranja" | "rosa" | "lavanda" | "coral";
 export type StatusIntencao = "ativa" | "pausada" | "virou_memoria" | "deixada_de_lado";
 
+export interface Conta {
+  email: string;
+  administrador: boolean;
+}
+
+export interface SessaoConectada {
+  id: string;
+  aparelho: string;
+  criado_em: string;
+  ultimo_uso: string;
+  esta: boolean;
+}
+
+export interface Convite {
+  id: string;
+  criado_em: string;
+  valido_ate: string;
+  usado: boolean;
+  cancelado: boolean;
+}
+
+export interface LinkGerado {
+  caminho: string;
+  valido_ate: string;
+}
+
 export interface Perfil {
   email: string;
   nascimento: string | null; // "AAAA-MM-DD"

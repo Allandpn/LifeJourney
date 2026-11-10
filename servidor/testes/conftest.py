@@ -75,7 +75,8 @@ def api():
     """Cliente da API com banco em memória e dois usuários fictícios.
 
     O cabeçalho `X-Teste-Usuario` escolhe quem faz a requisição ("ana" ou "bia").
-    Ele só existe nos testes; o login de verdade entra na etapa 5.
+    Ele só existe nestes testes, para não precisar entrar com senha em cada um;
+    o login de verdade é testado em test_contas.py, com a fixture `servidor`.
     """
     motor = criar_motor("sqlite://", poolclass=StaticPool)
     criar_tabelas(motor)
@@ -131,3 +132,46 @@ def imagem(largura: int = 3000, altura: int = 2000, formato: str = "JPEG", exif:
     else:
         img.save(saida, formato)
     return saida.getvalue()
+
+
+# ---------- contas (login de verdade, sem atalhos) ----------
+
+SENHA_ANA = "senha-da-ana-123"
+SENHA_BIA = "senha-da-bia-456"
+
+
+@pytest.fixture
+def servidor(monkeypatch):
+    """Banco em memória com Ana (administradora) e Bia, ambas com senha.
+
+    Devolve uma função que cria um "aparelho" novo (um cliente com seus próprios cookies).
+    """
+    from app.api import contas
+    from app.seguranca import Limitador, hash_da_senha
+
+    for nome in ("tentativas_por_email", "tentativas_por_endereco", "tentativas_de_codigo"):
+        original = getattr(contas, nome)
+        monkeypatch.setattr(contas, nome, Limitador(original.maximo, original.janela))
+
+    motor = criar_motor("sqlite://", poolclass=StaticPool)
+    criar_tabelas(motor)
+    with Session(motor) as sessao:
+        sessao.add(Usuario(id="ana", email="ana@exemplo.local", senha_hash=hash_da_senha(SENHA_ANA), administrador=True))
+        sessao.add(Usuario(id="bia", email="bia@exemplo.local", senha_hash=hash_da_senha(SENHA_BIA)))
+        sessao.commit()
+
+    def sessao_de_teste():
+        with Session(motor) as sessao:
+            yield sessao
+
+    aplicacao.dependency_overrides[obter_sessao] = sessao_de_teste
+    aparelho = lambda: TestClient(aplicacao)  # noqa: E731
+    aparelho.motor = motor
+    yield aparelho
+    aplicacao.dependency_overrides.clear()
+
+
+def entrar(cliente, email="ana@exemplo.local", senha=SENHA_ANA):
+    resposta = cliente.post("/api/entrar", json={"email": email, "senha": senha})
+    assert resposta.status_code == 200, resposta.text
+    return cliente

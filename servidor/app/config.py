@@ -24,7 +24,7 @@ class Configuracao:
     modo: str  # "desenvolvimento" ou "producao"
     caminho_banco: Path
     pasta_fotos: Path
-    email_desenvolvimento: str  # usuário usado enquanto o login não existe (etapa 5)
+    email_desenvolvimento: str  # conta criada por "python -m app.exemplo"
 
     @property
     def desenvolvimento(self) -> bool:

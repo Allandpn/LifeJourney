@@ -84,6 +84,8 @@ button.intencao:hover { border-color: var(--destaque-2); }
 }
 .campo > legend { padding: 0; margin-bottom: 7px; }
 .campo small, .interruptor small { font-family: var(--fonte-texto); font-size: 0.78rem; letter-spacing: 0; text-transform: none; color: var(--texto-secundario); }
+.formulario input[type="email"],
+.formulario input[type="password"],
 .formulario input[type="text"],
 .formulario input[type="date"],
 .formulario input[type="month"],
@@ -174,4 +176,29 @@ button.intencao:hover { border-color: var(--destaque-2); }
   #formulario { width: 100%; max-width: 100%; max-height: 100%; height: 100%; margin: 0; border-radius: 0; border: 0; }
   .formulario { padding: max(18px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
   .formulario .acoes { bottom: calc(-1 * max(18px, env(safe-area-inset-bottom))); padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+}
+
+/* ---------- conta ---------- */
+.conta-botao { font-family: var(--fonte-titulo); font-size: 1rem; font-weight: 600; }
+#conta { width: min(560px, calc(100% - 24px)); }
+.conta { gap: 22px; }
+.conta section { display: grid; gap: 10px; justify-items: start; }
+.conta section > ul, .conta section > div, .conta section > form { justify-self: stretch; }
+.conta h3 { margin: 0; font-family: var(--fonte-titulo); font-weight: 600; font-size: 1rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--texto-secundario); }
+.conta .email { margin: -8px 0 0; font-size: 1.05rem; }
+.conta .explica { margin: 0; color: var(--texto-secundario); font-size: 0.9rem; }
+.selo { display: inline-block; margin-left: 6px; padding: 1px 8px; border: 1px solid var(--linha); border-radius: 999px; font-family: var(--fonte-titulo); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--destaque-2); vertical-align: middle; }
+.aparelhos, .convites { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.aparelhos li, .convites li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--linha); }
+.aparelhos small, .convites small { display: block; color: var(--texto-secundario); font-size: 0.8rem; }
+.troca { display: grid; gap: 12px; }
+.troca .botao { justify-self: start; }
+.troca .mensagem { margin: 0; color: var(--cap-menta); }
+.link-gerado { display: grid; gap: 8px; padding: 12px; border: 1px dashed var(--destaque-2); border-radius: 8px; }
+.link-gerado p { margin: 0; font-size: 0.88rem; }
+.link-gerado input { width: 100%; font: inherit; font-size: 0.85rem; color: var(--texto); background: var(--fundo); border: 1px solid var(--linha); border-radius: 6px; padding: 8px; }
+.link-gerado .botao { justify-self: start; }
+.conta .erro { margin: 0; color: var(--destaque); }
+@media (max-width: 440px) {
+  #conta { width: 100%; max-width: 100%; max-height: 100%; height: 100%; margin: 0; border-radius: 0; border: 0; }
 }
