@@ -132,7 +132,7 @@ As mudanças no banco são aplicadas sozinhas quando o servidor liga (migraçõe
 | [Arquitetura](docs/06-arquitetura.md) | Tecnologias, pastas e módulos, com o porquê de cada escolha |
 | [Roteiro](docs/07-roteiro.md) | Etapas de construção |
 | [Decisões](docs/08-decisoes.md) | O que já foi decidido, o que está proposto e o que está em aberto |
-| [Publicação](docs/09-publicacao.md) | Passo a passo para colocar no ar no Raspberry Pi |
+| [Publicação](docs/09-publicacao.md) | Colocar no ar no Raspberry Pi, pelo deploy assinado do Guardian |
 
 ## Privacidade
 

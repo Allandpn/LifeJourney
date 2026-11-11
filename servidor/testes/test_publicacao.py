@@ -155,3 +155,30 @@ def test_origem_permitida_por_configuracao(servidor, monkeypatch):
     monkeypatch.setattr(principal, "obter_configuracao", lambda: config)
     assert cliente.post("/api/memorias", json=pedido, headers=origem).status_code == 201
     assert cliente.post("/api/memorias", json=pedido, headers={"Origin": "https://malicioso.example"}).status_code == 403
+
+
+def test_criar_admin_com_link_sem_terminal(tmp_path, monkeypatch, capsys):
+    """No Pi fechado, o primeiro administrador é criado por script: sem digitar senha, recebe um link."""
+    from app import contas
+    from app.banco import criar_motor, preparar_banco
+    from app.config import Configuracao
+
+    motor = criar_motor(f"sqlite:///{tmp_path / 'pi.db'}")
+    preparar_banco(motor)
+    config = Configuracao(modo="producao", caminho_banco=tmp_path / "pi.db", pasta_fotos=tmp_path, email_desenvolvimento="x",
+                          origens_permitidas=("vida-em-semanas.exemplo.ts.net",))
+    monkeypatch.setattr(contas, "obter_motor", lambda: motor)
+    monkeypatch.setattr(contas, "obter_configuracao", lambda: config)
+    monkeypatch.setattr(contas.getpass, "getpass", lambda *_: pytest.fail("não deveria pedir senha"))
+
+    assert contas.main(["criar-admin", "Allan@Exemplo.com", "--link"]) == 0
+    link = capsys.readouterr().out.strip().splitlines()[-1]
+    assert link.startswith("https://vida-em-semanas.exemplo.ts.net/#redefinir-")
+
+    from sqlmodel import Session, select
+
+    from app.modelos import Redefinicao, Usuario
+    with Session(motor) as s:
+        admin = s.exec(select(Usuario)).one()
+        assert admin.email == "allan@exemplo.com" and admin.administrador and admin.senha_hash is None
+        assert len(s.exec(select(Redefinicao)).all()) == 1

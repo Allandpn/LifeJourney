@@ -29,7 +29,9 @@ COPY --from=aplicativo /aplicativo/dist /servico/aplicativo
 RUN chmod -R a+rX /servico
 
 # roda sem ser root; os dados ficam no volume /dados, as cópias em /copias
-RUN useradd --create-home --uid 1000 vida && mkdir -p /dados /copias && chown vida:vida /dados /copias
+# uid 10001 (como o gateway do Guardian): não coincide com o usuário comum do Pi (1000),
+# que assim não consegue ler o banco e as fotos
+RUN useradd --create-home --uid 10001 vida && mkdir -p /dados /copias && chown vida:vida /dados /copias
 USER vida
 
 ENV LJ_MODO=producao \

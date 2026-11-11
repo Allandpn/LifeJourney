@@ -1,8 +1,46 @@
 # 9. Publicação no Raspberry Pi
 
-Passo a passo para colocar o Vida em Semanas no ar, num Raspberry Pi 4 ligado o tempo todo, junto com outros projetos.
+## Com o Guardian (o caminho usado)
 
-Os comandos `bash` rodam no Pi (por SSH). Os que dizem "no seu computador" rodam no Windows.
+No Pi do Allan, nada muda sem a assinatura do guardião-mestre: o deploy é feito pelo deployer do [Guardian](https://github.com/Allandpn/guardian) (`docs/DEPLOY.md` e `docs/OPERACAO-FECHADA.md` de lá). Uma etiqueta `release/N` neste repositório vira uma oferta na tela **Deploys**; o mestre aprova com a passkey; o deployer faz o checkout, roda `docker compose up -d --build`, confere a saúde e volta sozinho se falhar.
+
+O acesso é pelo Tailscale, com um nó só do projeto (`https://vida-em-semanas.<tailnet>.ts.net`), sem domínio e sem porta aberta no Pi. Os dados ficam numa pasta do SSD e as cópias noturnas, cifradas, no cartão SD.
+
+### Uma vez, antes de tudo
+
+1. **Chave das cópias, no seu computador** (com o [age](https://github.com/FiloSottile/age/releases)):
+   ```powershell
+   age-keygen -o chave-vida-em-semanas.txt
+   ```
+   Guarde o arquivo fora do Pi (gerenciador de senhas). Ele mostra a chave pública `age1...`, que vai no script.
+2. **ACL do Tailscale** (painel do Tailscale > Access controls): acrescente a tag e uma regra para os seus aparelhos chegarem ao nó novo. O nó não aparece como origem: ele não alcança ninguém, como o gateway do Guardian.
+   ```
+   "tagOwners": { "tag:semanas": ["autogroup:admin"] },
+   "acls": [
+     { "action": "accept", "src": ["tag:protegido", "autogroup:member"], "dst": ["tag:semanas:443"] }
+   ]
+   ```
+3. **Chave de autenticação** (painel > Settings > Keys): pré-autorizada, uso único, **não** efêmera, com `tag:semanas`.
+4. **Endereço da tailnet:** o fim do endereço dos seus aparelhos (ex.: `tail1234.ts.net`), em painel > DNS.
+
+### Instalar
+
+1. **Primeira instalação (mestre):** no site do Guardian, **PC > Executar no Raspberry Pi**, cole `deploy/guardian/1-primeira-instalacao.sh` com as três linhas do topo preenchidas e assine. O script confere tudo antes de mudar algo, cria `/opt/vida-em-semanas` (só do root), as pastas de dados e cópias, o `.env`, a entrada no registro do deployer e a cópia noturna, e reinicia o deployer.
+2. **Etiqueta `release/1`** neste repositório (quem desenvolve, com a confirmação do dono). Em até 20 s aparece em **Deploys**. A primeira aparece como "mexe em segurança", porque tudo é novo: é esperado.
+3. **Colocar no ar (mestre).** A primeira compilação no Pi leva alguns minutos.
+4. **Conta do administrador (mestre):** **PC > Executar no Raspberry Pi** com `deploy/guardian/2-criar-admin.sh` (preencha o e-mail). A saída, no histórico de Deploys, traz um link de uso único para criar a senha.
+5. **No celular:** abra `https://vida-em-semanas.<tailnet>.ts.net`, crie a senha pelo link e instale o aplicativo (menu do navegador > Instalar app / Adicionar à tela inicial). Os aparelhos protegidos usam o Pi-hole como DNS: se o endereço não abrir, confira se `*.ts.net` está liberado como o do Guardian.
+
+### Depois
+
+- **Atualizar:** merge, nova etiqueta `release/N` (N sempre maior), aprovar em Deploys. As migrações do banco rodam sozinhas ao ligar. Voltar atrás é publicar `release/N+1` com a correção (o deployer recusa versão mais antiga).
+- **Convidar alguém:** compartilhar o nó `vida-em-semanas` pelo Tailscale e mandar o convite do aplicativo (Conta > Gerar link de convite).
+- **Cópias:** toda noite às 3h em `/var/backups/vida-em-semanas` (cartão SD), cifradas; registro em `/var/log/vida-em-semanas-copia.log`. Tirá-las do Pi (para a nuvem, por exemplo) ainda exige um script assinado: fica para depois.
+- **Limites:** sem a cifra do SSD, quem levar o disco lê os dados; o Pi fica no cofre. Atrás do Tailscale, o limite de tentativas por endereço vale para todos juntos; o limite por conta continua.
+
+## Sem o Guardian
+
+O resto deste documento descreve a instalação manual (com `sudo` no Pi), com Cloudflare ou Tailscale.
 
 ## Como fica
 
@@ -263,37 +301,16 @@ As mudanças no banco (migrações) são aplicadas sozinhas quando o servidor li
 
 ## Sem domínio: Tailscale
 
-Com o [Tailscale](https://tailscale.com/), só os aparelhos da sua conta Tailscale (e de quem você compartilhar) acessam o Pi, sem domínio e sem abrir o roteador. O Tailscale dá o HTTPS que o login exige.
+Com o [Tailscale](https://tailscale.com/), só os aparelhos da sua tailnet acessam. O compose sobe um nó Tailscale só do projeto (`https://vida-em-semanas.<tailnet>.ts.net`), sem porta aberta no Pi:
 
-No lugar dos passos 4 e 5 da Cloudflare:
-
-1. No [painel do Tailscale](https://login.tailscale.com/admin/dns), ligue **MagicDNS** e **HTTPS Certificates**.
-2. Se o Tailscale ainda não estiver no Pi:
-   ```bash
-   curl -fsSL https://tailscale.com/install.sh | sh
+1. No painel do Tailscale, ligue **MagicDNS** e **HTTPS Certificates** e gere uma chave de autenticação pré-autorizada, de uso único, não efêmera.
+2. No `.env` do Pi:
    ```
-   ```bash
-   sudo tailscale up
+   COMPOSE_PROFILES=tailscale
+   TS_AUTHKEY=tskey-auth-...
+   LJ_ORIGENS_PERMITIDAS=vida-em-semanas.SUA-TAILNET.ts.net
    ```
-3. Descubra o endereço do Pi na sua rede (algo como `raspberrypi.tailXXXX.ts.net`):
-   ```bash
-   tailscale status --json | grep -m1 '"DNSName"'
-   ```
-4. No `.env` do Pi, tire o `#` e preencha (sem o ponto final do endereço):
-   ```
-   COMPOSE_FILE=docker-compose.yml:docker-compose.tailscale.yml
-   LJ_ORIGENS_PERMITIDAS=raspberrypi.tailXXXX.ts.net
-   ```
-   Se a porta 8080 já for usada por outro projeto do Pi, escolha outra com `LJ_PORTA_LOCAL`.
-5. Ligue (passo 6) e depois publique na sua rede Tailscale, com HTTPS (troque 8080 se mudou a porta):
-   ```bash
-   sudo tailscale serve --bg 8080
-   ```
-6. No celular, instale o app do Tailscale, entre na mesma conta e abra `https://raspberrypi.tailXXXX.ts.net`.
-
-Para outra pessoa usar, compartilhe o Pi com ela pelo painel do Tailscale (**Share**) e depois envie o convite do Vida em Semanas.
-
-Atrás do Tailscale, o limite de tentativas por endereço vê todos os pedidos como vindos do próprio Pi, então vira um limite único para todos. O limite por conta continua valendo, e só aparelhos da sua rede chegam ao Pi.
+3. Ligue (passo 6). No celular, com o app do Tailscale na mesma conta, abra o endereço.
 
 ## O que fica de fora nesta versão
 
