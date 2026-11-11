@@ -106,8 +106,41 @@ def estender_gompertz(
     return tuple(qx)
 
 
+def estender_pela_expectativa(
+    qx_conhecidos: dict[int, float], expectativa_aberta: float, idade_maxima: int
+) -> tuple[float, ...]:
+    """Completa a tábua acima da última idade com uma curva de Gompertz calibrada.
+
+    A curva parte do risco da última idade publicada e sobe com a inclinação que faz a
+    expectativa de vida no grupo aberto (ex.: "90 ou mais") bater com a que o IBGE publica.
+    Usa a própria informação da tábua, em vez de só extrapolar a tendência dos 60 aos 89.
+    """
+    from app.nucleo.sobrevivencia import expectativa_sem_ajuste
+
+    ultima = max(qx_conhecidos)
+    if sorted(qx_conhecidos) != list(range(ultima + 1)):
+        raise ValueError("A tábua precisa ter todas as idades de 0 até a última.")
+    mu_ultima = -math.log(1 - qx_conhecidos[ultima])
+    conhecidos = [qx_conhecidos[x] for x in range(ultima + 1)]
+
+    def montar(inclinacao: float) -> tuple[float, ...]:
+        extra = [1 - math.exp(-mu_ultima * math.exp(inclinacao * (x - ultima))) for x in range(ultima + 1, idade_maxima)]
+        return tuple(conhecidos + extra + [1.0])
+
+    # inclinação maior = mortes mais rápidas = expectativa menor
+    baixo, alto = 0.0, 1.0
+    for _ in range(60):
+        meio = (baixo + alto) / 2
+        if expectativa_sem_ajuste(Tabua("calibracao", montar(meio)), ultima + 1) > expectativa_aberta:
+            baixo = meio
+        else:
+            alto = meio
+    return montar((baixo + alto) / 2)
+
+
 def carregar_csv(
-    caminho: Path | str, sexo: str, ajuste_de: int, ajuste_ate: int, idade_maxima: int
+    caminho: Path | str, sexo: str, ajuste_de: int, ajuste_ate: int, idade_maxima: int,
+    expectativa_aberta: float | None = None,
 ) -> Tabua:
     """Lê um CSV `idade,sexo,qx` e estende acima de `ajuste_ate` com Gompertz.
 
@@ -121,6 +154,8 @@ def carregar_csv(
                 conhecidos[int(linha["idade"])] = float(linha["qx"])
     if not conhecidos:
         raise ValueError(f"Nenhuma linha para o sexo '{sexo}' em {caminho}.")
+    if expectativa_aberta is not None:
+        return Tabua(sexo, estender_pela_expectativa(conhecidos, expectativa_aberta, idade_maxima))
     return Tabua(sexo, estender_gompertz(conhecidos, ajuste_de, ajuste_ate, idade_maxima))
 
 
@@ -139,7 +174,8 @@ def carregar_tabua(config_tabua: dict, sexo: str, idade_maxima: int, pasta: Path
         )
     if tipo == "csv":
         extensao = config_tabua["extensao_gompertz"]
+        aberta = config_tabua.get("expectativa_no_grupo_aberto", {}).get(sexo)
         return carregar_csv(
-            pasta / config_tabua["arquivo"], sexo, extensao["de"], extensao["ate"], idade_maxima
+            pasta / config_tabua["arquivo"], sexo, extensao["de"], extensao["ate"], idade_maxima, aberta
         )
     raise ValueError(f"Tipo de tábua desconhecido: {tipo}")

@@ -6,9 +6,13 @@ from app.nucleo.sobrevivencia import expectativa_sem_ajuste
 from app.nucleo.tabua import Tabua, carregar_csv, carregar_tabua, estender_gompertz
 
 
+def tabua_provisoria(modelo, sexo):
+    return carregar_tabua(modelo.config["tabua"]["_tabua_provisoria_anterior"], sexo, 120, modelo.pasta_dados)
+
+
 @pytest.mark.parametrize("sexo, alvo", [("masculino", 20.8), ("feminino", 24.2)])
 def test_tabua_provisoria_bate_a_expectativa_aos_60_do_ibge(modelo, sexo, alvo):
-    assert expectativa_sem_ajuste(modelo.tabua(sexo), 60) == pytest.approx(alvo, abs=0.05)
+    assert expectativa_sem_ajuste(tabua_provisoria(modelo, sexo), 60) == pytest.approx(alvo, abs=0.05)
 
 
 @pytest.mark.parametrize("sexo", ["masculino", "feminino"])
@@ -19,9 +23,29 @@ def test_tabua_termina_na_idade_maxima(modelo, sexo):
     assert all(0 < q <= 1 for q in tabua.qx)
 
 
-def test_mortalidade_cresce_com_a_idade_na_vida_adulta(modelo):
-    qx = modelo.tabua("masculino").qx
-    assert all(qx[i] < qx[i + 1] for i in range(30, 120))
+@pytest.mark.parametrize("sexo", ["masculino", "feminino"])
+def test_mortalidade_cresce_com_a_idade_a_partir_dos_35(modelo, sexo):
+    # Entre 28 e 31 anos, a mortalidade dos homens cai um pouco: é o excesso de mortes por
+    # violência e acidentes de homens jovens no Brasil, que a tábua do IBGE mostra.
+    qx = modelo.tabua(sexo).qx
+    assert all(qx[i] < qx[i + 1] for i in range(35, 120))
+
+
+@pytest.mark.parametrize("sexo", ["masculino", "feminino"])
+def test_tabua_reproduz_as_expectativas_publicadas_pelo_ibge(modelo, sexo):
+    """A importação e a extensão acima de 90 anos batem com a tábua oficial."""
+    referencia = modelo.config["tabua"]["referencias_para_conferir"][sexo]
+    tabua = modelo.tabua(sexo)
+    for idade in (0, 60, 90):
+        assert expectativa_sem_ajuste(tabua, idade) == pytest.approx(referencia[f"e{idade}"], abs=0.02), idade
+
+
+def test_valores_de_referencia_do_briefing(modelo):
+    """Expectativa ao nascer 73,3 (homens) e 79,9 (mulheres); aos 60, mais 20,8 e 24,2."""
+    assert expectativa_sem_ajuste(modelo.tabua("masculino"), 0) == pytest.approx(73.3, abs=0.05)
+    assert expectativa_sem_ajuste(modelo.tabua("feminino"), 0) == pytest.approx(79.9, abs=0.05)
+    assert expectativa_sem_ajuste(modelo.tabua("masculino"), 60) == pytest.approx(20.8, abs=0.05)
+    assert expectativa_sem_ajuste(modelo.tabua("feminino"), 60) == pytest.approx(24.2, abs=0.06)
 
 
 def test_mulheres_vivem_mais_que_homens_na_tabua(modelo):

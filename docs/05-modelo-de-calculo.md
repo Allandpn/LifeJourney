@@ -71,11 +71,32 @@ Só fatores causais e modificáveis recebem "e se?". Os valores de HR por respos
 
 ## Tábua do IBGE
 
-- **Fonte:** Tábuas Completas de Mortalidade para o Brasil, 2024 (publicadas em 28/11/2025).
-- **Formato no projeto:** um CSV simples (`idade, sexo, qx`), trocável sem mudar código quando sair a edição seguinte.
-- **Acima de 80 anos:** a tábua termina num grupo aberto. Ajusta-se uma curva de Gompertz às idades de 60 a 80 e extrapola-se até 110 ou 120.
-- **Validação da importação:** expectativa ao nascer 76,6 anos (homens 73,3; mulheres 79,9); aos 60 anos, mais 20,8 (homens) e 24,2 (mulheres).
+- **Fonte:** Tábuas Completas de Mortalidade para o Brasil, 2024 (publicadas em 28/11/2025), planilhas `homens.xlsx` e `mulheres.xlsx` do [servidor de arquivos do IBGE](https://ftp.ibge.gov.br/Tabuas_Completas_de_Mortalidade/Tabuas_Completas_de_Mortalidade_2024/xlsx/).
+- **No projeto:** `servidor/dados/tabua-ibge-2024.csv` (`idade, sexo, qx`), com as idades simples de 0 a 89. A ferramenta `servidor/ferramentas/converter_tabua_ibge.py` converte as planilhas de qualquer ano.
+- **Acima de 89 anos:** a tábua termina no grupo aberto "90 ou mais". A partir dele, o risco segue uma curva de Gompertz que parte do risco publicado aos 89 e sobe com a inclinação que reproduz a expectativa publicada para o grupo aberto (4,57 anos para homens e 5,32 para mulheres). A Gompertz ajustada só às idades de 60 a 89 servia para os homens, mas fazia as mulheres morrerem rápido demais depois dos 90.
+- **Validação** (testes automáticos, margem de 0,02 ano):
+
+  | | Homens: modelo | Homens: IBGE | Mulheres: modelo | Mulheres: IBGE |
+  |---|---|---|---|---|
+  | Ao nascer | 73,31 | 73,31 | 79,87 | 79,87 |
+  | Aos 60 | 20,80 | 20,80 | 24,15 | 24,15 |
+  | Aos 90 | 4,57 | 4,57 | 5,32 | 5,32 |
+
+- **Corcova dos homens jovens:** entre 28 e 31 anos, a mortalidade masculina cai um pouco antes de voltar a subir. É o excesso de mortes por violência e acidentes. A curva provisória do briefing era lisa e não tinha isso; por isso o percentil 10 dos homens jovens ficou mais baixo com a tábua real.
+- **Ano que vem:** o IBGE publica a tábua de 2025 até 1º/12/2026. Basta converter as planilhas, trocar o arquivo e as expectativas de referência em `fatores.json`, e rodar os testes.
 - **Limitação:** é tábua de período, não de coorte; para quem é jovem hoje, subestima levemente a vida.
+
+### O que mudou com a tábua real
+
+Homem de 38,4 anos (o caso de teste do briefing):
+
+| | Curva provisória | Tábua real |
+|---|---|---|
+| Brasileiro médio: média / P10 / mediana / P90 | 77,7 / 59,2 / 79,6 / 92,9 | 77,1 / 57,4 / 79,4 / 92,9 |
+| Caso de teste (risco 1,65) | 72,8 / 54,4 / 74,0 / 88,7 | 72,0 / 52,6 / 73,3 / 88,6 |
+| "E se?" vínculos / sono / atividade / IMC / todas | +211 / +61 / +49 / +36 / +338 semanas | +221 / +64 / +51 / +38 / +354 semanas |
+
+A diferença maior está no P10 (quase 2 anos): a tábua real tem mais mortes entre os 30 e os 60 anos do que a curva lisa, sobretudo por causas externas. A mediana e o P90 quase não mudam.
 
 ## Tudo em configuração
 
@@ -117,7 +138,7 @@ O ganho de cada "e se?" é a diferença na expectativa média, convertida em sem
 
 Com a tábua provisória, o núcleo reproduz o protótipo descrito no briefing: diferenças de até 0,1 ano nos percentis e de 1 semana nos ganhos do "e se?".
 
-A calibração ainda não bate. Aos 50 anos, o perfil com quatro hábitos saudáveis vive 16,4 anos a mais que o perfil sem nenhum, contra 12 (homens) e 14 (mulheres) em Li et al. O perfil sem hábitos bate no teto de 4,0. O teste `test_calibracao.py` está marcado como falha esperada até isso ser resolvido.
+Com a tábua real, a calibração bate para as mulheres e ainda não para os homens. Aos 50 anos, o perfil com quatro hábitos saudáveis vive 15,3 anos (mulheres) e 16,9 anos (homens) a mais que o perfil sem nenhum, contra 14 e 12 em Li et al. O perfil sem hábitos bate no teto de 4,0. O caso dos homens está marcado como falha esperada em `test_calibracao.py`.
 
 O teto também achata o "e se?" de perfis com muitos fatores de risco: se o risco total passaria de 4,0, tirar um fator pequeno quase não muda o risco já cortado no teto. Num perfil de teste com risco de 4,4 (cortado para 4,0), dormir de 6 a 8 horas rendeu só 9 semanas. A calibração do teto deve levar isso em conta.
 
@@ -127,7 +148,7 @@ Como as médias brasileiras ainda são placeholders, um perfil com alguns fatore
 
 Podem andar em paralelo ao código.
 
-- [ ] Importar a tábua real do IBGE 2024 e estender acima de 80 anos.
+- [x] Importar a tábua real do IBGE 2024 e estender acima do grupo aberto (90 anos).
 - [ ] Conferir no texto completo dos artigos os HRs derivados ou aproximados.
 - [ ] Converter álcool e ritmo de caminhada de "anos de vida" para HR.
 - [ ] Definir um HR mais modesto para atividade física autorreferida.

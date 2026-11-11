@@ -46,14 +46,18 @@ def test_risco_maior_encurta_a_faixa(modelo):
     assert alto.p10 < baixo.p10 and alto.p90 < baixo.p90
 
 
-# Valores do protótipo descrito no briefing (seção 7): homem de 38,4 anos,
-# mesma curva provisória. Servem para confirmar que o núcleo novo reproduz o cálculo.
+# Valores do protótipo descrito no briefing (seção 7): homem de 38,4 anos, com a curva
+# provisória de Gompertz-Makeham que ele usava (não a tábua real). Confirmam que o
+# método de cálculo é o mesmo; a diferença para a tábua real está em docs/05.
 @pytest.mark.parametrize(
     "hr, media, p10, mediana, p90",
     [(1.0, 77.7, 59.2, 79.6, 92.9), (1.65, 72.8, 54.4, 74.0, 88.7)],
 )
 def test_reproduz_o_prototipo_do_briefing(modelo, hr, media, p10, mediana, p90):
-    r = calcular_resultado(modelo.tabua("masculino"), 38.4, hr, modelo.parametros)
+    from app.nucleo.tabua import carregar_tabua
+
+    provisoria = carregar_tabua(modelo.config["tabua"]["_tabua_provisoria_anterior"], "masculino", 120, modelo.pasta_dados)
+    r = calcular_resultado(provisoria, 38.4, hr, modelo.parametros)
     assert r.expectativa_media == pytest.approx(media, abs=0.3)
     assert r.p10 == pytest.approx(p10, abs=0.3)
     assert r.mediana == pytest.approx(mediana, abs=0.3)

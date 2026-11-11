@@ -1,5 +1,5 @@
 {
-  "versao": "2026-11-provisoria-2",
+  "versao": "2026-11-ibge2024-1",
   "_nota": "Todos os números do modelo ficam aqui. 'status' diz o grau de confiança: 'publicado' (no resumo do artigo), 'aproximado' (derivado ou a conferir no texto completo), 'provisorio' (sem fonte direta, só para testar o sistema). Ver docs/05-modelo-de-calculo.md.",
   "parametros": {
     "atenuacao": {
@@ -24,22 +24,40 @@
     "semanas_por_ano": 52.1775
   },
   "tabua": {
-    "tipo": "gompertz_makeham_provisoria",
-    "b": 0.09,
-    "c": 0.0006,
-    "expectativa_aos_60": {
-      "masculino": 20.8,
-      "feminino": 24.2
+    "tipo": "csv",
+    "arquivo": "tabua-ibge-2024.csv",
+    "extensao_gompertz": {
+      "de": 60,
+      "ate": 90
     },
-    "status": "provisorio",
-    "fonte": "Curva mu(x) = a·e^(0,09x) + 0,0006, com 'a' ajustado para a expectativa aos 60 da tábua IBGE 2024. Substituir pela tábua real (etapa 9).",
-    "_exemplo_tabua_real": {
-      "tipo": "csv",
-      "arquivo": "tabua-ibge-2024.csv",
-      "extensao_gompertz": {
-        "de": 60,
-        "ate": 80
+    "expectativa_no_grupo_aberto": {
+      "masculino": 4.57456043732327,
+      "feminino": 5.31841528410922
+    },
+    "status": "publicado",
+    "fonte": "IBGE, Tábuas Completas de Mortalidade para o Brasil – 2024 (planilhas homens.xlsx e mulheres.xlsx em ftp.ibge.gov.br/Tabuas_Completas_de_Mortalidade/Tabuas_Completas_de_Mortalidade_2024/xlsx/, baixadas em 11/11/2026). Idades simples de 0 a 89; acima de 90, curva de Gompertz calibrada para reproduzir a expectativa de vida publicada no grupo '90 ou mais'.",
+    "referencias_para_conferir": {
+      "masculino": {
+        "e0": 73.3081,
+        "e60": 20.8037,
+        "e90": 4.5746
+      },
+      "feminino": {
+        "e0": 79.8691,
+        "e60": 24.1542,
+        "e90": 5.3184
       }
+    },
+    "_tabua_provisoria_anterior": {
+      "tipo": "gompertz_makeham_provisoria",
+      "b": 0.09,
+      "c": 0.0006,
+      "expectativa_aos_60": {
+        "masculino": 20.8,
+        "feminino": 24.2
+      },
+      "status": "provisorio",
+      "fonte": "Curva mu(x) = a·e^(0,09x) + 0,0006, com 'a' ajustado para a expectativa aos 60 da tábua IBGE 2024. Substituir pela tábua real (etapa 9)."
     }
   },
   "fatores": {
