@@ -27,6 +27,7 @@ class Configuracao:
     email_desenvolvimento: str  # conta criada por "python -m app.exemplo"
     cabecalho_do_ip: str | None = None  # ex.: "CF-Connecting-IP", atrás do túnel da Cloudflare
     pasta_do_aplicativo: Path | None = None  # aplicativo compilado (npm run build), servido em "/"
+    origens_permitidas: tuple[str, ...] = ()  # endereços públicos do site, ex.: "pi.tailnet.ts.net"
 
     @property
     def desenvolvimento(self) -> bool:
@@ -48,4 +49,5 @@ def obter_configuracao() -> Configuracao:
         email_desenvolvimento=os.environ.get("LJ_EMAIL_DESENVOLVIMENTO", "dev@exemplo.local"),
         cabecalho_do_ip=os.environ.get("LJ_CABECALHO_DO_IP") or None,
         pasta_do_aplicativo=Path(os.environ["LJ_APLICATIVO"]) if os.environ.get("LJ_APLICATIVO") else None,
+        origens_permitidas=tuple(o.strip().lower() for o in os.environ.get("LJ_ORIGENS_PERMITIDAS", "").split(",") if o.strip()),
     )

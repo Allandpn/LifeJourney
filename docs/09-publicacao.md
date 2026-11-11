@@ -31,7 +31,17 @@ flowchart LR
 | Um domínio na Cloudflare | Endereço público com HTTPS (ex.: `semanas.seudominio.com.br`). Sem domínio, veja [a alternativa](#sem-dominio-tailscale) |
 | O programa `age` também no seu computador | Para guardar a chave que abre as cópias |
 
-## 1. Disco cifrado para os dados
+## 1. Disco para os dados
+
+Se o SSD já é usado por outros projetos e não pode ser formatado, pule a cifra: crie só a pasta, por exemplo:
+
+```bash
+sudo mkdir -p /mnt/ssd/vida-em-semanas && sudo chown 1000:1000 /mnt/ssd/vida-em-semanas
+```
+
+e use esse caminho em `LJ_PASTA_DADOS`. Sem a cifra, quem levar o disco consegue ler os dados; com o Tailscale, ao menos ninguém de fora da sua rede chega ao Pi.
+
+### Disco cifrado (SSD novo)
 
 Cifrar o SSD protege as memórias e as respostas de saúde se o Pi ou o disco for furtado. A cifra usa LUKS, o padrão do Linux.
 
@@ -119,9 +129,10 @@ O comando mostra a chave pública (`age1...`). Guarde o arquivo `chave-vida-em-s
 nano ~/vida-em-semanas/.env
 ```
 
-Tire o `#` e preencha estas linhas da parte "no Raspberry Pi":
+Tire o `#` e preencha estas linhas da parte "no Raspberry Pi" (com Tailscale, troque as duas primeiras pelas da [seção do Tailscale](#sem-dominio-tailscale)):
 
 ```
+COMPOSE_PROFILES=cloudflare
 CLOUDFLARE_TUNNEL_TOKEN=o-token-copiado
 LJ_COPIA_CHAVE_PUBLICA=age1...
 LJ_PASTA_DADOS=/mnt/dados/vida-em-semanas
@@ -148,7 +159,7 @@ A primeira compilação no Pi leva alguns minutos. Depois:
 docker compose ps
 ```
 
-Os dois serviços devem aparecer como `running`, e o `app` como `healthy` depois de um minuto. Se algo falhar:
+Com a Cloudflare, os dois serviços (`app` e `tunel`) devem aparecer como `running`; com o Tailscale, só o `app`. O `app` fica `healthy` depois de um minuto. Se algo falhar:
 
 ```bash
 docker compose logs app
@@ -252,16 +263,37 @@ As mudanças no banco (migrações) são aplicadas sozinhas quando o servidor li
 
 ## Sem domínio: Tailscale
 
-Sem domínio próprio, dá para usar o [Tailscale](https://tailscale.com/): só os aparelhos da sua conta Tailscale (e de quem você compartilhar) acessam o Pi. **Este caminho não foi testado**; o do túnel da Cloudflare foi.
+Com o [Tailscale](https://tailscale.com/), só os aparelhos da sua conta Tailscale (e de quem você compartilhar) acessam o Pi, sem domínio e sem abrir o roteador. O Tailscale dá o HTTPS que o login exige.
 
-1. Tire o serviço `tunel` do `docker-compose.yml`.
-2. Tire o `#` da linha `ports: ["127.0.0.1:8080:8000"]`.
-3. Ligue o HTTPS do Tailscale, que o login exige:
+No lugar dos passos 4 e 5 da Cloudflare:
+
+1. No [painel do Tailscale](https://login.tailscale.com/admin/dns), ligue **MagicDNS** e **HTTPS Certificates**.
+2. Se o Tailscale ainda não estiver no Pi:
    ```bash
-   tailscale serve --bg 8080
+   curl -fsSL https://tailscale.com/install.sh | sh
    ```
-4. Apague a linha `LJ_CABECALHO_DO_IP` do `docker-compose.yml`: o Tailscale não envia esse cabeçalho, e mantê-la deixaria qualquer pessoa da rede escolher o endereço que o limite de tentativas enxerga.
-5. Se o login for recusado como "pedido de outro site", o Tailscale está mudando o cabeçalho `Host` no caminho; nesse caso, me avise para ajustarmos.
+   ```bash
+   sudo tailscale up
+   ```
+3. Descubra o endereço do Pi na sua rede (algo como `raspberrypi.tailXXXX.ts.net`):
+   ```bash
+   tailscale status --json | grep -m1 '"DNSName"'
+   ```
+4. No `.env` do Pi, tire o `#` e preencha (sem o ponto final do endereço):
+   ```
+   COMPOSE_FILE=docker-compose.yml:docker-compose.tailscale.yml
+   LJ_ORIGENS_PERMITIDAS=raspberrypi.tailXXXX.ts.net
+   ```
+   Se a porta 8080 já for usada por outro projeto do Pi, escolha outra com `LJ_PORTA_LOCAL`.
+5. Ligue (passo 6) e depois publique na sua rede Tailscale, com HTTPS (troque 8080 se mudou a porta):
+   ```bash
+   sudo tailscale serve --bg 8080
+   ```
+6. No celular, instale o app do Tailscale, entre na mesma conta e abra `https://raspberrypi.tailXXXX.ts.net`.
+
+Para outra pessoa usar, compartilhe o Pi com ela pelo painel do Tailscale (**Share**) e depois envie o convite do Vida em Semanas.
+
+Atrás do Tailscale, o limite de tentativas por endereço vê todos os pedidos como vindos do próprio Pi, então vira um limite único para todos. O limite por conta continua valendo, e só aparelhos da sua rede chegam ao Pi.
 
 ## O que fica de fora nesta versão
 

@@ -24,6 +24,9 @@ COPY servidor/migracoes ./migracoes
 COPY servidor/alembic.ini ./
 RUN pip install --no-cache-dir .
 COPY --from=aplicativo /aplicativo/dist /servico/aplicativo
+# o código precisa ser legível pelo usuário que roda o servidor, qualquer que seja a
+# permissão com que os arquivos chegaram (o git normaliza, mas uma cópia direta não)
+RUN chmod -R a+rX /servico
 
 # roda sem ser root; os dados ficam no volume /dados, as cópias em /copias
 RUN useradd --create-home --uid 1000 vida && mkdir -p /dados /copias && chown vida:vida /dados /copias

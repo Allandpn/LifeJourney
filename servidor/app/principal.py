@@ -85,13 +85,16 @@ for modulo in (contas, admin, perfil, memorias, capitulos, intencoes, saude, dad
 async def protecoes(request: Request, chamar):
     """Recusa pedidos que alteram dados vindos de outro site, e acrescenta cabeçalhos de segurança.
 
-    O cookie já é SameSite=Lax; conferir a origem é uma segunda barreira.
+    O cookie já é SameSite=Lax; conferir a origem é uma segunda barreira. Vale a origem
+    igual ao endereço do pedido, ou uma das LJ_ORIGENS_PERMITIDAS (útil quando um proxy,
+    como o Tailscale, entrega o pedido com outro endereço).
     """
     if request.method not in METODOS_SEGUROS:
         origem = request.headers.get("origin")
         if origem:
             host = request.headers.get("x-forwarded-host") or request.headers.get("host")
-            if urlsplit(origem).netloc != host:
+            origem_do_pedido = urlsplit(origem).netloc.lower()
+            if origem_do_pedido != (host or "").lower() and origem_do_pedido not in obter_configuracao().origens_permitidas:
                 return JSONResponse({"detail": "Pedido de outro site recusado."}, status_code=403)
     resposta = await chamar(request)
     resposta.headers.setdefault("X-Content-Type-Options", "nosniff")

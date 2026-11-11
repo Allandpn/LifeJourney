@@ -1,0 +1,10 @@
+# Acesso pelo Tailscale, somado ao docker-compose.yml (COMPOSE_FILE no .env).
+# A porta só fica aberta para o próprio Pi (127.0.0.1); quem leva os pedidos da sua
+# rede Tailscale até ela, com HTTPS, é o "tailscale serve" rodando no Pi.
+services:
+  app:
+    ports:
+      - "127.0.0.1:${LJ_PORTA_LOCAL:-8080}:8000"
+    environment:
+      # o Tailscale não envia o cabeçalho da Cloudflare; vazio = não confiar em cabeçalho nenhum
+      LJ_CABECALHO_DO_IP: ""

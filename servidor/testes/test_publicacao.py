@@ -137,3 +137,21 @@ def test_migracao_mantem_os_dados_de_um_banco_da_versao_anterior(tmp_path):
 
     with motor.connect() as c:
         assert c.execute(text("select texto, id_de_origem from memoria")).one() == ("Antes da migração.", None)
+
+
+def test_origem_permitida_por_configuracao(servidor, monkeypatch):
+    """Atrás do Tailscale o endereço do pedido pode mudar; o endereço público configurado vale como origem."""
+    from app import principal
+    from app.config import Configuracao
+    from conftest import entrar
+
+    cliente = entrar(servidor())
+    pedido = {"data": "2020-01-01", "texto": "x"}
+    origem = {"Origin": "https://pi.exemplo.ts.net"}
+    assert cliente.post("/api/memorias", json=pedido, headers=origem).status_code == 403
+
+    config = Configuracao(modo="desenvolvimento", caminho_banco=None, pasta_fotos=None, email_desenvolvimento="x",
+                          origens_permitidas=("pi.exemplo.ts.net",))
+    monkeypatch.setattr(principal, "obter_configuracao", lambda: config)
+    assert cliente.post("/api/memorias", json=pedido, headers=origem).status_code == 201
+    assert cliente.post("/api/memorias", json=pedido, headers={"Origin": "https://malicioso.example"}).status_code == 403
