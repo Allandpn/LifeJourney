@@ -138,21 +138,40 @@ O ganho de cada "e se?" é a diferença na expectativa média, convertida em sem
 
 Com a tábua provisória, o núcleo reproduz o protótipo descrito no briefing: diferenças de até 0,1 ano nos percentis e de 1 semana nos ganhos do "e se?".
 
-Com a tábua real, a calibração bate para as mulheres e ainda não para os homens. Aos 50 anos, o perfil com quatro hábitos saudáveis vive 15,3 anos (mulheres) e 16,9 anos (homens) a mais que o perfil sem nenhum, contra 14 e 12 em Li et al. O perfil sem hábitos bate no teto de 4,0. O caso dos homens está marcado como falha esperada em `test_calibracao.py`.
+Com a tábua real e as médias do Vigitel, a calibração bate para as mulheres e ainda não para os homens. Aos 50 anos, o perfil com quatro hábitos saudáveis vive 15,1 anos (mulheres) e 16,7 anos (homens) a mais que o perfil sem nenhum, contra 14 e 12 em Li et al. O perfil sem hábitos bate no teto de 4,0. O caso dos homens está marcado como falha esperada em `test_calibracao.py`.
 
 O teto também achata o "e se?" de perfis com muitos fatores de risco: se o risco total passaria de 4,0, tirar um fator pequeno quase não muda o risco já cortado no teto. Num perfil de teste com risco de 4,4 (cortado para 4,0), dormir de 6 a 8 horas rendeu só 9 semanas. A calibração do teto deve levar isso em conta.
 
-Como as médias brasileiras ainda são placeholders, um perfil com alguns fatores de risco pode sair com risco total abaixo de 1,0. Isso é efeito da recentragem sobre médias inventadas, e muda quando as prevalências reais entrarem.
+### Médias brasileiras
+
+As médias de sete fatores agora vêm das prevalências do Vigitel 2024 (capitais e Distrito Federal) e da PNS 2019, ponderando o HR de cada resposta pela fração da população nela. As pesquisas usam categorias mais largas que as do questionário; a divisão dentro delas é suposição, anotada fator a fator em `fatores.json`.
+
+| Fator | Média provisória do briefing | Média com Vigitel/PNS |
+|---|---|---|
+| Fumo | 1,275 | 1,275 |
+| IMC | 1,214 | 1,248 |
+| Atividade física | 1,213 | 1,073 |
+| Saúde autoavaliada | 1,295 | 1,299 |
+| Sono | 1,054 | 1,039 |
+| Diabetes | 1,030 | 1,108 |
+| Depressão | 1,052 | 1,075 |
+
+As médias provisórias estavam perto das reais, menos em atividade física e diabetes. Com elas, o caso de teste do briefing foi de risco 1,65 para 1,57 (média 72,5 anos; P10 53,0; mediana 74,0; P90 89,1).
+
+Como o brasileiro médio já tem parte dos fatores de risco, um perfil com poucos deles pode sair com risco total abaixo de 1,0. Isso é o esperado da recentragem: o 1,0 é a média, não a pessoa sem nenhum risco.
 
 ## Pendências científicas
 
 Podem andar em paralelo ao código.
 
 - [x] Importar a tábua real do IBGE 2024 e estender acima do grupo aberto (90 anos).
-- [ ] Conferir no texto completo dos artigos os HRs derivados ou aproximados.
+- [x] Conferir no texto completo os HRs de IMC (todos batem com o artigo) e de fumo (coerentes com a revisão de Jha, 2020).
+- [ ] Conferir os demais aproximados: fumo depois dos 40, vínculos sociais e os interpolados (saúde "muito boa", vínculos "1 a 2").
 - [ ] Converter álcool e ritmo de caminhada de "anos de vida" para HR.
 - [ ] Definir um HR mais modesto para atividade física autorreferida.
-- [ ] Levantar as prevalências brasileiras reais (Vigitel, PNS). As usadas até agora são provisórias, sem fonte.
+- [x] Levantar as prevalências brasileiras de fumo, IMC, atividade física, saúde autoavaliada, sono, diabetes e depressão (Vigitel 2024; PNS 2019), com as suposições de divisão anotadas em `fatores.json`.
+- [ ] Prevalências de álcool (doses por semana), ritmo de caminhada e vínculos sociais: sem dado brasileiro na escala das perguntas; seguem provisórias.
+- [ ] Prevalências por sexo (o Vigitel tem; o modelo hoje usa uma média para os dois sexos).
 - [ ] Escolher a forma final da atenuação depois dos 75 anos.
 - [ ] Calibrar redutor, teto e piso contra Li et al. (2018): perfil com cinco hábitos saudáveis contra nenhum, aos 50 anos, deve dar perto de 12 anos de diferença (homens) e 14 (mulheres).
 

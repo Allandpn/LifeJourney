@@ -19,7 +19,7 @@ Etapas 0 a 6 e 8 do [roteiro](docs/07-roteiro.md) concluídas, e a etapa 7 pront
 - cada pessoa pode exportar tudo num ZIP aberto (com as memórias também em texto legível), importar de volta em qualquer conta sem duplicar, e apagar a própria conta;
 - cada pessoa tem a sua conta, criada por convite do administrador, com login, troca de senha e lista de aparelhos conectados.
 
-Os números ainda são provisórios: as médias brasileiras são placeholders e a calibração está pendente (ver [Modelo de cálculo](docs/05-modelo-de-calculo.md)).
+O cálculo usa a tábua real do IBGE 2024 e médias brasileiras do Vigitel 2024 para sete dos dez fatores. Ainda faltam a calibração para os homens e dados brasileiros de três fatores (ver [Modelo de cálculo](docs/05-modelo-de-calculo.md)).
 
 - Protótipo visual: [`prototipo/linha-do-tempo.html`](prototipo/linha-do-tempo.html) (abrir no navegador)
 

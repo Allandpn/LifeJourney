@@ -13,7 +13,7 @@ Cada etapa termina com algo que funciona e pode ser visto. Até a etapa 6, tudo 
 | 6. Questionário e "e se?" ✅ | Tela de perguntas, faixa estimada e ganhos; o futuro da linha passa a usar o resultado | Responder muda o futuro da linha |
 | 7. Publicação (pronta; falta instalar no Pi) | Servidor no Raspberry Pi com Docker, HTTPS, disco cifrado e cópia de segurança noturna; aplicativo instalável no celular; endereço real de quem acessa (atrás do túnel) e cabeçalhos de segurança da página | Registrar no celular e ver no computador; restaurar uma cópia de segurança funciona |
 | 8. Exportação e exclusão ✅ | Exportar e importar o ZIP da própria conta; apagar a conta | Importar em uma conta nova recupera tudo; apagar remove dados e fotos |
-| 9. Tábua real (tábua ✅; fatores em andamento) | Tábua do IBGE 2024 no lugar da provisória; fatores conferidos | Teste de importação bate com os valores de referência |
+| 9. Tábua real (tábua ✅; médias brasileiras de 7 fatores ✅; calibração dos homens e 3 fatores pendentes) | Tábua do IBGE 2024 no lugar da provisória; fatores conferidos | Teste de importação bate com os valores de referência |
 
 A etapa 9 depende das pendências científicas listadas em [Modelo de cálculo](05-modelo-de-calculo.md) e pode ser adiantada.
 

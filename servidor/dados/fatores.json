@@ -1,5 +1,5 @@
 {
-  "versao": "2026-11-ibge2024-1",
+  "versao": "2026-11-ibge2024-3",
   "_nota": "Todos os números do modelo ficam aqui. 'status' diz o grau de confiança: 'publicado' (no resumo do artigo), 'aproximado' (derivado ou a conferir no texto completo), 'provisorio' (sem fonte direta, só para testar o sistema). Ver docs/05-modelo-de-calculo.md.",
   "parametros": {
     "atenuacao": {
@@ -73,7 +73,7 @@
         },
         "parou_antes_40": {
           "hr": 1.1,
-          "status": "aproximado",
+          "status": "publicado",
           "rotulo": "parei antes dos 40"
         },
         "parou_depois_40": {
@@ -88,15 +88,22 @@
         }
       },
       "media_br": {
-        "valor": 1.275,
-        "status": "provisorio",
-        "fonte": "Placeholder sem fonte. Trocar por prevalências do Vigitel/PNS."
+        "prevalencias": {
+          "nunca": 0.66,
+          "parou_antes_40": 0.1125,
+          "parou_depois_40": 0.1125,
+          "fuma": 0.115
+        },
+        "status": "aproximado",
+        "fonte": "Vigitel 2024 (Ministério da Saúde, conjunto das capitais e DF): fumantes 11,5%, ex-fumantes 22,5%. Divisão dos ex-fumantes pela idade em que pararam (metade antes, metade depois dos 40) é suposição.",
+        "valor_provisorio_anterior": 1.275
       },
       "e_se": {
         "fuma": "parou_depois_40"
       },
       "_nota_e_se": "Conservador: parar agora conta como 'parou depois dos 40' mesmo para quem tem menos de 40.",
-      "acao_e_se": "Parar de fumar"
+      "acao_e_se": "Parar de fumar",
+      "conferido": "Jha, eLife 2020 (texto completo): fumantes têm mortalidade 'cerca de três vezes' a de quem nunca fumou (2,8 é coerente e um pouco conservador); quem para antes dos 40 evita 'mais de 90% do risco a mais', o que põe o HR em até ~1,18 (1,1 está dentro). O valor de quem parou depois dos 40 segue aproximado: o artigo não dá um número único."
     },
     "imc": {
       "pergunta": "Qual a sua altura e o seu peso?",
@@ -136,8 +143,7 @@
       "respostas": {
         "abaixo_de_18_5": {
           "hr": 1.51,
-          "status": "aproximado",
-          "nota": "Faixa 15–18,5; não está no briefing, conferir no artigo.",
+          "status": "publicado",
           "rotulo": "IMC abaixo de 18,5"
         },
         "18_5_a_20": {
@@ -162,12 +168,12 @@
         },
         "30_a_35": {
           "hr": 1.45,
-          "status": "aproximado",
+          "status": "publicado",
           "rotulo": "IMC de 30 a 35"
         },
         "35_a_40": {
           "hr": 1.94,
-          "status": "aproximado",
+          "status": "publicado",
           "rotulo": "IMC de 35 a 40"
         },
         "40_ou_mais": {
@@ -177,9 +183,19 @@
         }
       },
       "media_br": {
-        "valor": 1.2135,
-        "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "prevalencias": {
+          "abaixo_de_18_5": 0.025,
+          "18_5_a_20": 0.05,
+          "20_a_25": 0.299,
+          "25_a_27_5": 0.2,
+          "27_5_a_30": 0.169,
+          "30_a_35": 0.17,
+          "35_a_40": 0.06,
+          "40_ou_mais": 0.027
+        },
+        "status": "aproximado",
+        "fonte": "Vigitel 2024 (Ministério da Saúde, conjunto das capitais e DF): IMC ≥ 25 em 62,6% e IMC ≥ 30 em 25,7%. A divisão dentro de cada grupo (abaixo de 25, 25–30 e 30 ou mais) é suposição.",
+        "valor_provisorio_anterior": 1.2135
       },
       "e_se": {
         "abaixo_de_18_5": "20_a_25",
@@ -190,7 +206,8 @@
         "35_a_40": "20_a_25",
         "40_ou_mais": "20_a_25"
       },
-      "acao_e_se": "Chegar a um IMC entre 20 e 25"
+      "acao_e_se": "Chegar a um IMC entre 20 e 25",
+      "conferido": "Valores conferidos no texto completo (resumo: HR relativo a IMC 22,5–25 em nunca-fumantes sem doença crônica). Na faixa abaixo de 18,5, o artigo cobre 15 a 18,5."
     },
     "alcool": {
       "pergunta": "Quantas doses de bebida alcoólica você toma por semana? (1 dose ≈ 14 g de álcool)",
@@ -226,7 +243,7 @@
       "media_br": {
         "valor": 1.0355,
         "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "fonte": "Placeholder sem fonte. O Vigitel mede consumo episódico pesado (20,4% em 2024), não doses por semana; falta dado brasileiro na escala da pergunta."
       },
       "e_se": {
         "7_a_14": "ate_7",
@@ -262,9 +279,15 @@
         }
       },
       "media_br": {
-        "valor": 1.2125,
-        "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "prevalencias": {
+          "menos_de_30": 0.094,
+          "30_a_150": 0.239,
+          "150_a_300": 0.3335,
+          "mais_de_300": 0.3335
+        },
+        "status": "aproximado",
+        "fonte": "Vigitel 2024 (Ministério da Saúde, conjunto das capitais e DF): fisicamente inativos 9,4% (tomados como menos de 30 min) e prática insuficiente 33,3% (menos de 150 min, incluindo os inativos). A divisão dos 66,7% que chegam a 150 min (metade até 300, metade acima) é suposição.",
+        "valor_provisorio_anterior": 1.2125
       },
       "e_se": {
         "menos_de_30": "150_a_300",
@@ -296,7 +319,7 @@
       "media_br": {
         "valor": 1.228,
         "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "fonte": "Placeholder sem fonte. Não há dado brasileiro de ritmo de caminhada."
       }
     },
     "saude": {
@@ -332,9 +355,16 @@
         }
       },
       "media_br": {
-        "valor": 1.295,
-        "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "prevalencias": {
+          "excelente": 0.08,
+          "muito_boa": 0.15,
+          "boa": 0.431,
+          "regular": 0.264,
+          "ruim": 0.075
+        },
+        "status": "aproximado",
+        "fonte": "Vigitel 2024 (Ministério da Saúde, conjunto das capitais e DF): saúde ruim ou muito ruim 7,5%; PNS 2019 (IBGE): boa ou muito boa 66,1%. A divisão entre excelente, muito boa e boa é suposição, e as escalas das pesquisas não são idênticas à do estudo.",
+        "valor_provisorio_anterior": 1.295
       }
     },
     "sono": {
@@ -360,9 +390,14 @@
         }
       },
       "media_br": {
-        "valor": 1.054,
-        "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "prevalencias": {
+          "menos_de_6": 0.202,
+          "6_a_8": 0.748,
+          "9_ou_mais": 0.05
+        },
+        "status": "aproximado",
+        "fonte": "Vigitel 2024 (Ministério da Saúde, conjunto das capitais e DF): duração curta de sono (menos de 6 horas) 20,2%. Sono de 9 horas ou mais (5%) é suposição: o Vigitel não mede.",
+        "valor_provisorio_anterior": 1.054
       },
       "e_se": {
         "menos_de_6": "6_a_8"
@@ -407,9 +442,17 @@
         }
       },
       "media_br": {
-        "valor": 1.03,
-        "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "prevalencias": {
+          "nao": 0.871,
+          "diagnostico_antes_40": 0.00645,
+          "diagnostico_40_49": 0.0258,
+          "diagnostico_50_59": 0.04515,
+          "diagnostico_60_69": 0.0387,
+          "diagnostico_70_ou_mais": 0.0129
+        },
+        "status": "aproximado",
+        "fonte": "Vigitel 2024 (Ministério da Saúde, conjunto das capitais e DF): diagnóstico médico de diabetes 12,9%. A divisão pela idade do diagnóstico (5% antes dos 40, 20% aos 40, 35% aos 50, 30% aos 60, 10% aos 70 ou mais) é suposição.",
+        "valor_provisorio_anterior": 1.03
       }
     },
     "vinculos": {
@@ -442,7 +485,7 @@
       "media_br": {
         "valor": 1.094,
         "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "fonte": "Placeholder sem fonte. Falta levantar o módulo de apoio social da PNS (com quantas pessoas pode contar)."
       },
       "e_se": {
         "nenhuma": "3_a_5",
@@ -467,9 +510,13 @@
         }
       },
       "media_br": {
-        "valor": 1.052,
-        "status": "provisorio",
-        "fonte": "Placeholder sem fonte."
+        "prevalencias": {
+          "nao": 0.855,
+          "sim": 0.145
+        },
+        "status": "aproximado",
+        "fonte": "Vigitel 2024 (Ministério da Saúde, conjunto das capitais e DF): diagnóstico médico de depressão 14,5%. Usado o valor mais alto disponível (a PNS 2019 dá 10,2%), o que dá o efeito menor, como manda o princípio conservador. A pergunta do Vigitel não separa depressão atual de passada.",
+        "valor_provisorio_anterior": 1.052
       }
     }
   }
