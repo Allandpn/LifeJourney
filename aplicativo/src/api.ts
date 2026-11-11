@@ -2,7 +2,7 @@
 
 import type {
   Capitulo, CapituloDados, Conta, Convite, EnvioDeRespostas, Estimativa, Intencao, IntencaoDados, LinkGerado, Memoria,
-  MemoriaDados, Perfil, Pergunta, RodadaDeRespostas, SessaoConectada, Sexo,
+  MemoriaDados, Perfil, Pergunta, ResumoDaImportacao, RodadaDeRespostas, SessaoConectada, Sexo,
 } from "./tipos";
 
 export class ErroDaApi extends Error {
@@ -82,6 +82,27 @@ export const api = {
     pedir<void>("/api/conta/senha", json("POST", { senha_atual, senha_nova })),
   sessoes: () => pedir<SessaoConectada[]>("/api/conta/sessoes"),
   desconectar: (id: string) => pedir<void>(`/api/conta/sessoes/${id}`, { method: "DELETE" }),
+  dados: {
+    /** Baixa o ZIP com tudo da conta e devolve o arquivo e o nome sugerido. */
+    exportar: async (): Promise<{ arquivo: Blob; nome: string }> => {
+      let resposta: Response;
+      try {
+        resposta = await fetch("/api/exportacao", { credentials: "same-origin" });
+      } catch {
+        throw new ErroDaApi(0, "Sem conexão com o servidor.");
+      }
+      if (resposta.status === 401) aoPerderSessao();
+      if (!resposta.ok) throw new ErroDaApi(resposta.status, "Não foi possível exportar.");
+      const nome = /filename="([^"]+)"/.exec(resposta.headers.get("content-disposition") ?? "")?.[1] ?? "vida-em-semanas.zip";
+      return { arquivo: await resposta.blob(), nome };
+    },
+    importar: (arquivo: Blob) => {
+      const formulario = new FormData();
+      formulario.append("arquivo", arquivo, "dados.zip");
+      return pedir<ResumoDaImportacao>("/api/importacao", { method: "POST", body: formulario });
+    },
+    apagarConta: (senha: string) => pedir<void>("/api/conta/apagar", json("POST", { senha })),
+  },
   admin: {
     criarConvite: () => pedir<LinkGerado>("/api/admin/convites", { method: "POST" }),
     convites: () => pedir<Convite[]>("/api/admin/convites"),

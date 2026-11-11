@@ -115,6 +115,85 @@ A implementação está em `servidor/app/modelos.py` (tabelas) e `servidor/app/e
 | `POST /api/questionario/respostas` | Guarda uma rodada de respostas e devolve a faixa nova |
 | `GET /api/questionario/respostas` | Rodadas anteriores, da mais nova para a mais antiga |
 | `DELETE /api/questionario/respostas` | Apaga de verdade todas as respostas de saúde da conta |
+| `GET /api/exportacao` | O ZIP com tudo da conta |
+| `POST /api/importacao` | Traz os dados de um ZIP exportado e devolve o resumo |
+| `POST /api/conta/apagar` | Apaga a conta e tudo dela (pede a senha) |
+| `GET /api/estimativa` | Faixa para hoje (com as últimas respostas, ou a média brasileira), curva de sobrevivência ano a ano e "e se?" |
+
+Regras que a API garante:
+
+- o aplicativo não escolhe `id` nem dono: campos desconhecidos são recusados;
+- memória não pode ter data futura, nem texto vazio ou com mais de 280 caracteres;
+- capítulo não pode terminar antes de começar;
+- `veio_de` e `memoria_id` só aceitam memórias do próprio usuário;
+- uma alteração parcial é validada junto com o resto do registro;
+- registro excluído, inexistente ou de outra pessoa respondem igual: "não encontrado" (404).
+
+## Respostas do questionário
+
+Cada vez que o usuário responde, guarda-se um registro novo. O histórico permite comparar a estimativa ao longo do tempo.
+
+| Campo | Tipo | Observação |
+|---|---|---|
+| `data` | data | Quando respondeu (`criado_em`) |
+| `respostas` | fator → resposta | Pergunta pulada fica ausente e conta como a média brasileira. O IMC fica guardado já em faixa |
+| `altura_m`, `peso_kg` | números | Opcionais; servem para calcular a faixa de IMC e para preencher o questionário da próxima vez |
+| `versaoConfig` | texto | Versão do arquivo de fatores usada no cálculo |
+| `resultado` | percentis 10, 50, 90 e risco total | Guardado para comparação histórica |
+
+Por serem dados de saúde, as respostas são apagadas de verdade quando a pessoa pede, e não só marcadas como excluídas. A estimativa é sempre recalculada para a idade de hoje, com a rodada mais recente; respostas que deixaram de existir numa versão nova da configuração são ignoradas.
+
+## Exportação (backup da pessoa)
+
+Na tela **Conta → Seus dados**, cada pessoa baixa um ZIP com tudo o que é dela:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `dados.json` | Perfil, memórias, capítulos, intenções e respostas de saúde, com `formato: 1` |
+| `fotos/<id da memória>.jpg` | A foto de cada memória |
+| `memorias.md` | As memórias em texto, em ordem de data, com um título a cada capítulo principal. Dá para ler sem o aplicativo |
+
+Exportar grava a data em `ultimo_backup`. Se faz mais de 30 dias (ou nunca aconteceu), o botão da conta mostra um ponto discreto.
+
+### Importação
+
+- Os registros são casados pelo `id`. Um registro que já existe na conta só muda se o do arquivo tiver `atualizado_em` mais recente; nada é duplicado. Importar traz de volta um registro excluído.
+- Um `id` que pertence a outra conta nunca é tocado: o registro ganha um id novo, e o id antigo fica em `id_de_origem`, para que importar o mesmo arquivo de novo também não duplique.
+- Ids fora do formato do servidor são sempre trocados. As ligações (`veio_de`, `memoria_id`) acompanham as trocas.
+- Cada registro é validado como num cadastro normal; os inválidos são recusados um a um, sem impedir o resto.
+- As fotos passam de novo pela redução e pela limpeza de metadados.
+- O perfil do arquivo só é usado se a conta ainda não tiver data de nascimento. Por isso, uma conta nova pode importar já na tela de boas-vindas.
+- Limites: 500 MB enviados e 1 GB depois de abrir o ZIP. Nada é extraído para o disco.
+
+### Apagar a conta
+
+Pede a senha de novo e dois toques. Remove de verdade, sem marcação: memórias, fotos (a pasta inteira), capítulos, intenções, respostas de saúde, sessões, links de senha nova e convites criados pela pessoa. Um convite que ela tinha usado continua sem valer. As cópias de segurança do servidor guardam os dados até serem substituídas, em até 30 noites no padrão.
+
+## Na API
+
+A implementação está em `servidor/app/modelos.py` (tabelas) e `servidor/app/esquemas.py` (validação). Os nomes de campos na API usam `_` (`veio_de`, `criado_em`).
+
+| Rota | Faz |
+|---|---|
+| `POST /api/entrar` e `POST /api/sair` | Abre e fecha a sessão deste aparelho |
+| `POST /api/contas` | Cria conta com um código de convite |
+| `POST /api/redefinir-senha` | Cria senha nova com um link do administrador |
+| `GET /api/conta`, `POST /api/conta/senha` | Quem está logado; trocar a senha |
+| `GET /api/conta/sessoes`, `DELETE /api/conta/sessoes/{id}` | Aparelhos conectados; desconectar um |
+| `/api/admin/convites`, `POST /api/admin/redefinicoes` | Só administrador: convites e links de senha nova |
+| `GET` / `PUT /api/perfil` | Lê e grava nascimento e sexo |
+| `GET /api/memorias` | Lista em ordem de data; aceita `?de=` e `?ate=` |
+| `POST /api/memorias` | Cria |
+| `GET` / `PATCH` / `DELETE /api/memorias/{id}` | Lê, altera só os campos enviados, exclui |
+| `PUT` / `GET` / `DELETE /api/memorias/{id}/foto` | Envia (ou troca), mostra e remove a foto; só o dono acessa |
+| `/api/capitulos` e `/api/intencoes` | As mesmas cinco operações |
+| `GET /api/questionario` | As perguntas, com as opções, os rótulos e a fonte de cada uma |
+| `POST /api/questionario/respostas` | Guarda uma rodada de respostas e devolve a faixa nova |
+| `GET /api/questionario/respostas` | Rodadas anteriores, da mais nova para a mais antiga |
+| `DELETE /api/questionario/respostas` | Apaga de verdade todas as respostas de saúde da conta |
+| `GET /api/exportacao` | O ZIP com tudo da conta |
+| `POST /api/importacao` | Traz os dados de um ZIP exportado e devolve o resumo |
+| `POST /api/conta/apagar` | Apaga a conta e tudo dela (pede a senha) |
 | `GET /api/estimativa` | Faixa para hoje (com as últimas respostas, ou a média brasileira), curva de sobrevivência ano a ano e "e se?" |
 
 Regras que a API garante:

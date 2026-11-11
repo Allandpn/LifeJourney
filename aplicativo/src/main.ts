@@ -5,7 +5,7 @@ import { api, ErroDaApi, quandoPerderSessao } from "./api";
 import { type Dados, TelaDaLinhaDoTempo } from "./linha-do-tempo/tela";
 import { telaDeCriarConta, telaDeEntrar, telaDeRedefinir } from "./telas/acesso";
 import { mostrarBoasVindas } from "./telas/boas-vindas";
-import { abrirConta } from "./telas/conta";
+import { abrirConta, precisaDeBackup } from "./telas/conta";
 import { abrirEstimativa } from "./telas/estimativa";
 import type { Conta } from "./tipos";
 import { formularioDeCapitulo, formularioDeIntencao, formularioDeMemoria, hojeIso } from "./telas/formularios";
@@ -113,6 +113,7 @@ async function iniciar(): Promise<void> {
   $("#botao-conta").textContent = conta.email.slice(0, 1).toUpperCase();
 
   const perfil = await api.perfil();
+  lembrarDeExportar(perfil.ultimo_backup);
   if (!perfil.nascimento || !perfil.sexo) {
     document.body.dataset.tela = "boas-vindas";
     mostrarBoasVindas($("#boas-vindas"), () => void iniciar().catch(tratarErro));
@@ -151,7 +152,21 @@ function tratarErro(erro: unknown): void {
 
 quandoPerderSessao(recomecar);
 ligarMenuDeCriar();
+/** Um ponto discreto no botão da conta quando faz tempo que os dados não são exportados. */
+function lembrarDeExportar(ultimo: string | null): void {
+  const botao = $("#botao-conta");
+  const lembrar = precisaDeBackup(ultimo);
+  botao.classList.toggle("lembrete", lembrar);
+  botao.setAttribute("aria-label", lembrar ? "Conta (faz tempo que você não exporta os seus dados)" : "Conta");
+}
+
 $("#botao-conta").addEventListener("click", () => {
-  if (conta) void abrirConta($<HTMLDialogElement>("#conta"), conta, recomecar);
+  if (conta) {
+    void abrirConta($<HTMLDialogElement>("#conta"), conta, {
+      aoSair: recomecar,
+      aoExportar: lembrarDeExportar,
+      aoImportar: () => void recarregar(),
+    });
+  }
 });
 iniciar().catch(tratarErro);

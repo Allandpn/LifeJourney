@@ -52,6 +52,8 @@ def pasta_do_usuario(raiz: Path, usuario_id: str) -> Path:
 
 def gravar(raiz: Path, usuario_id: str, memoria_id: str, jpeg: bytes) -> str:
     """Grava o arquivo e devolve o nome dele. O nome muda a cada envio."""
+    if not re.fullmatch(r"[0-9a-f]+", memoria_id):
+        raise ValueError("Id de memória inesperado.")
     pasta = pasta_do_usuario(raiz, usuario_id)
     pasta.mkdir(parents=True, exist_ok=True)
     nome = f"{memoria_id}-{secrets.token_hex(4)}.jpg"

@@ -75,8 +75,7 @@ Uma faixa fixa na lateral mostra a vida inteira como grade de semanas (52 coluna
 | Criar ou editar capítulo | Nome, início, fim opcional, cor, categoria, notas, se é capítulo principal. |
 | Criar ou editar intenção | Nome, horizonte (data, intervalo ou "algum dia"), status, notas. |
 | Questionário e "e se?" | Perguntas de saúde, faixa resultante e ganho de cada mudança de hábito. Tela separada e opcional. |
-| Backup | Onde os dados ficam, exportar, importar e a data do último backup. |
-| Conta | Trocar a senha, sair, ver os aparelhos conectados, exportar tudo e apagar a conta. |
+| Conta | Seus dados (exportar, importar e a data da última exportação), aparelhos conectados, trocar a senha, convidar (administrador), apagar a conta e sair. |
 | Convites (só administrador) | Gerar e cancelar links de convite; gerar link de redefinição de senha. |
 
 ## Celular primeiro

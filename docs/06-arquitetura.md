@@ -181,7 +181,8 @@ Na v1 isso é tratado com transparência: a tela de criação de conta avisa que
 ### Direitos de cada usuário
 
 - **Exportar tudo** em formato aberto, a qualquer momento.
-- **Apagar a conta**, o que remove os dados e as fotos do servidor. As cópias de segurança antigas expiram em prazo definido.
+- **Apagar a conta**, o que remove de verdade os dados e as fotos do servidor. As cópias de segurança antigas guardam os dados até serem substituídas (30 noites no padrão).
+- **Importar com segurança:** um arquivo de outra pessoa nunca altera os registros dela; ids e fotos do arquivo são conferidos antes de usar.
 
 ### Repositório público
 

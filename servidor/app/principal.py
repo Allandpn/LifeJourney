@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app import __version__
-from app.api import admin, capitulos, contas, intencoes, memorias, perfil, saude
+from app.api import admin, capitulos, contas, dados, intencoes, memorias, perfil, saude
 from app.banco import obter_motor, preparar_banco
 from app.config import obter_configuracao
 
@@ -77,7 +77,7 @@ app = FastAPI(
     openapi_url="/openapi.json" if _desenvolvimento else None,
 )
 
-for modulo in (contas, admin, perfil, memorias, capitulos, intencoes, saude):
+for modulo in (contas, admin, perfil, memorias, capitulos, intencoes, saude, dados):
     app.include_router(modulo.rotas)
 
 

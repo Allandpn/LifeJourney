@@ -26,6 +26,11 @@ export interface Convite {
   cancelado: boolean;
 }
 
+export interface ResumoDaImportacao {
+  perfil_preenchido: boolean;
+  resumo: Record<string, { criados: number; atualizados: number; mantidos: number; recusados: number }>;
+}
+
 export interface LinkGerado {
   caminho: string;
   valido_ate: string;

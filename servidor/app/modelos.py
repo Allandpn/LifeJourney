@@ -81,6 +81,9 @@ class Registro(SQLModel):
     criado_em: datetime = Field(default_factory=agora)
     atualizado_em: datetime = Field(default_factory=agora)
     excluido_em: datetime | None = None
+    # id que o registro tinha no arquivo de onde foi importado, quando precisou ganhar um id novo;
+    # permite importar o mesmo arquivo de novo sem duplicar
+    id_de_origem: str | None = Field(default=None, index=True)
 
 
 class Memoria(Registro, table=True):

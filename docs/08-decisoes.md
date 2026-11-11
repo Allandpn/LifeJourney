@@ -40,6 +40,8 @@ Registro curto do que foi decidido e do que falta decidir. Decisões tomadas nã
 | Cloudflare Tunnel para acesso externo | HTTPS automático sem abrir o roteador; Tailscale documentado como alternativa, sem teste |
 | Cópias cifradas com chave pública (`age`), chave privada fora do Pi | Quem levar o Pi ou o disco de cópias não lê nada |
 | Migrações do banco com Alembic, aplicadas ao ligar | Mudanças nas tabelas sem perder dados reais |
+| Exportação em ZIP com JSON, fotos e Markdown; importação casando pelo id, sem duplicar | Os dados continuam legíveis sem o aplicativo e podem mudar de servidor |
+| Apagar a conta remove de verdade, com senha e dois toques | Direito de cada pessoa sobre os próprios dados |
 | Sem modo sem conexão na v1 | Não deixar memórias e respostas de saúde guardadas num celular que pode ser perdido |
 
 ## Propostas, aguardando confirmação

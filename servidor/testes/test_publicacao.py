@@ -111,3 +111,29 @@ def test_banco_antigo_sem_migracoes_e_marcado_na_versao_atual(tmp_path):
     assert "alembic_version" in inspect(motor).get_table_names()
     with motor.connect() as c:
         assert c.execute(text("select count(*) from alembic_version")).scalar() == 1
+
+
+def test_migracao_mantem_os_dados_de_um_banco_da_versao_anterior(tmp_path):
+    """Como no Pi ao atualizar: banco com dados na primeira versão, depois as migrações novas."""
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import text
+
+    from app.banco import PASTA_DO_SERVIDOR, criar_motor, preparar_banco
+
+    motor = criar_motor(f"sqlite:///{tmp_path / 'antigo.db'}")
+    config = Config(str(PASTA_DO_SERVIDOR / "alembic.ini"))
+    config.set_main_option("script_location", str(PASTA_DO_SERVIDOR / "migracoes"))
+    config.set_main_option("version_locations", str(PASTA_DO_SERVIDOR / "migracoes" / "versoes"))
+    with motor.begin() as conexao:
+        config.attributes["conexao"] = conexao
+        command.upgrade(config, "0035e3a3bf29")  # primeira versão
+        conexao.execute(text("insert into usuario (id, email, administrador, criado_em) values ('u', 'u@x.y', 0, '2026-01-01')"))
+        conexao.execute(text("insert into memoria (id, usuario_id, criado_em, atualizado_em, data, texto, intensidade, "
+                             "marcante, silenciar, veio_de, tags) values ('m', 'u', '2026-01-01', '2026-01-01', "
+                             "'2020-01-01', 'Antes da migração.', 2, 0, 0, '[]', '[]')"))
+
+    preparar_banco(motor)
+
+    with motor.connect() as c:
+        assert c.execute(text("select texto, id_de_origem from memoria")).one() == ("Antes da migração.", None)
