@@ -11,7 +11,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app import __version__
-from app.api import admin, capitulos, contas, estimativa, intencoes, memorias, perfil
+from app.api import admin, capitulos, contas, intencoes, memorias, perfil, saude
 from app.banco import criar_tabelas, obter_motor
 from app.config import obter_configuracao
 
@@ -60,7 +60,7 @@ app = FastAPI(
     openapi_url="/openapi.json" if _desenvolvimento else None,
 )
 
-for modulo in (contas, admin, perfil, memorias, capitulos, intencoes, estimativa):
+for modulo in (contas, admin, perfil, memorias, capitulos, intencoes, saude):
     app.include_router(modulo.rotas)
 
 

@@ -21,6 +21,7 @@ export interface Pedidos {
   editarMemoria(id: string): void;
   editarCapitulo(id: string): void;
   editarIntencao(id: string): void;
+  abrirEstimativa(): void;
 }
 
 interface Medida {
@@ -252,10 +253,11 @@ export class TelaDaLinhaDoTempo {
 
     document.addEventListener("click", (e) => {
       const alvo = (e.target as HTMLElement).closest<HTMLElement>(
-        "[data-ir],[data-memoria],[data-ampliar],[data-fechar],[data-nova-memoria],[data-editar-memoria],[data-capitulo],[data-intencao]",
+        "[data-ir],[data-memoria],[data-ampliar],[data-fechar],[data-nova-memoria],[data-editar-memoria],[data-capitulo],[data-intencao],[data-estimativa]",
       );
       if (!alvo) return;
-      if (alvo.dataset.novaMemoria) this.pedidos.novaMemoria(alvo.dataset.novaMemoria);
+      if (alvo.hasAttribute("data-estimativa")) this.pedidos.abrirEstimativa();
+      else if (alvo.dataset.novaMemoria) this.pedidos.novaMemoria(alvo.dataset.novaMemoria);
       else if (alvo.dataset.editarMemoria) {
         this.el.dialogo.close();
         this.pedidos.editarMemoria(alvo.dataset.editarMemoria);

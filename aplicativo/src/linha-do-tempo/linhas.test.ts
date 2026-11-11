@@ -34,7 +34,7 @@ function intencao(id: string, horizonte: Intencao["horizonte"], status: Intencao
 }
 
 const ESTIMATIVA: Estimativa = {
-  base: "brasileiro_medio", versao_config: "teste", hr_total: 1, expectativa_media: 81,
+  base: "brasileiro_medio", respondido_em: null, e_se: [], versao_config: "teste", hr_total: 1, expectativa_media: 81,
   p10: 62, mediana: 84, p90: 97,
   sobrevivencia: [[36.7, 1], [62, 0.9], [84, 0.5], [97, 0.1], [110, 0]],
 };

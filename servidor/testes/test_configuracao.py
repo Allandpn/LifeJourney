@@ -32,3 +32,11 @@ def test_toda_faixa_de_imc_tem_hr(config_real):
 def test_configuracao_real_carrega_para_os_dois_sexos(modelo):
     for sexo in ("masculino", "feminino"):
         assert len(modelo.fatores(sexo)) == 10
+
+
+def test_toda_resposta_tem_rotulo_e_todo_e_se_tem_frase(config_real):
+    for chave, fator in config_real["fatores"].items():
+        for resposta, definicao in fator["respostas"].items():
+            assert definicao.get("rotulo"), f"{chave}.{resposta}"
+        if fator.get("e_se"):
+            assert fator.get("acao_e_se"), chave

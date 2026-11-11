@@ -111,3 +111,18 @@ class Intencao(Registro, table=True):
     status: str = "ativa"
     notas: str | None = None
     memoria_id: str | None = Field(default=None, foreign_key="memoria.id")
+
+
+class RespostasDeSaude(Registro, table=True):
+    """Uma rodada do questionário. Cada envio cria uma nova, para formar o histórico.
+
+    São dados de saúde: ao apagar, o registro sai de verdade do banco (não só marcado).
+    """
+
+    __tablename__ = "respostas_de_saude"
+
+    respostas: dict[str, str] = Field(sa_column=Column(JSON, nullable=False))  # fator -> resposta (com o IMC já em faixa)
+    altura_m: float | None = None
+    peso_kg: float | None = None
+    versao_config: str
+    resultado: dict[str, Any] = Field(sa_column=Column(JSON, nullable=False))  # risco e faixa no dia do envio

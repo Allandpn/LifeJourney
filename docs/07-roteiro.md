@@ -10,7 +10,7 @@ Cada etapa termina com algo que funciona e pode ser visto. Até a etapa 6, tudo 
 | 3. Linha do tempo no celular ✅ | A tela do protótipo, com layout de celular primeiro, lendo da API | Rolagem, granularidade, minimapa e "Hoje" funcionam com dados de exemplo |
 | 4. Registro ✅ | Criar e editar memórias (com foto), capítulos e intenções pelo aplicativo | O que é registrado continua lá ao reabrir |
 | 5. Contas ✅ | Convites, criar conta, entrar, sair, trocar senha, aparelhos conectados; todas as rotas protegidas e isoladas por conta | Sem login nada é devolvido, e os testes de isolamento entre dois usuários passam |
-| 6. Questionário e "e se?" | Tela de perguntas, faixa estimada e ganhos; o futuro da linha passa a usar o resultado | Responder muda o futuro da linha |
+| 6. Questionário e "e se?" ✅ | Tela de perguntas, faixa estimada e ganhos; o futuro da linha passa a usar o resultado | Responder muda o futuro da linha |
 | 7. Publicação | Servidor no Raspberry Pi com Docker, HTTPS, disco cifrado e cópia de segurança noturna; aplicativo instalável no celular; endereço real de quem acessa (atrás do túnel) e cabeçalhos de segurança da página | Registrar no celular e ver no computador; restaurar uma cópia de segurança funciona |
 | 8. Exportação e exclusão | Exportar e importar o ZIP da própria conta; apagar a conta | Importar em uma conta nova recupera tudo; apagar remove dados e fotos |
 | 9. Tábua real | Tábua do IBGE 2024 no lugar da provisória; fatores conferidos | Teste de importação bate com os valores de referência |

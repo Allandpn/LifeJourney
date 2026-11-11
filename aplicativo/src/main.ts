@@ -6,6 +6,7 @@ import { type Dados, TelaDaLinhaDoTempo } from "./linha-do-tempo/tela";
 import { telaDeCriarConta, telaDeEntrar, telaDeRedefinir } from "./telas/acesso";
 import { mostrarBoasVindas } from "./telas/boas-vindas";
 import { abrirConta } from "./telas/conta";
+import { abrirEstimativa } from "./telas/estimativa";
 import type { Conta } from "./tipos";
 import { formularioDeCapitulo, formularioDeIntencao, formularioDeMemoria, hojeIso } from "./telas/formularios";
 
@@ -52,6 +53,7 @@ const pedidos = {
     if (capitulo) formularioDeCapitulo({ capitulo, nascimento: dados!.nascimento, aoSalvar: recarregar });
   },
   novaIntencao: () => formularioDeIntencao({ aoSalvar: recarregar }),
+  abrirEstimativa: () => void abrirEstimativa($<HTMLDialogElement>("#estimativa"), dados!.nascimento, () => void recarregar()).catch(tratarErro),
   editarIntencao: (id: string) => {
     const intencao = dados!.intencoes.find((i) => i.id === id);
     if (intencao) formularioDeIntencao({ intencao, aoSalvar: recarregar });

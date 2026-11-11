@@ -122,8 +122,9 @@ export function desenharLinha(linha: Linha, indice: number, ctx: Contexto): stri
 
   switch (linha.tipo) {
     case "borda":
-    case "marco":
       return `${abre(linha.tipo)}${espinha(linha, ctx)}<div class="nota">${esc(linha.texto)}</div></section>`;
+    case "marco":
+      return `${abre(linha.tipo)}${espinha(linha, ctx)}<div class="nota"><button type="button" class="marco-botao" data-estimativa>${esc(linha.texto)}</button></div></section>`;
 
     case "capitulo": {
       const c = linha.capitulo.capitulo;
@@ -163,7 +164,8 @@ export function desenharLinha(linha: Linha, indice: number, ctx: Contexto): stri
           <div class="semana">${formatarNumero(semanaDeVida(ctx.nascimento, ctx.hoje))}</div>
           <p>da sua vida · ${idadeEm(ctx.nascimento, ctx.hoje)} anos${capitulos ? ` · ${capitulos}` : ""}</p>${ecos}
           ${ctx.totalDeMemorias === 0 ? '<hr><p class="convite">Que tal começar por 3 a 5 memórias marcantes? Sem pressa: o resto pode vir aos poucos.</p>' : ""}
-          <div><button type="button" class="botao" data-nova-memoria="${iso(ctx.hoje)}">Registrar algo de hoje</button></div>
+          <div class="linha-de-botoes"><button type="button" class="botao" data-nova-memoria="${iso(ctx.hoje)}">Registrar algo de hoje</button>
+            <button type="button" class="ligacao-discreta" data-estimativa>Como o futuro é estimado</button></div>
         </div>${linha.memorias.map((m) => cartaoDeMemoria(m, ctx)).join("")}</div></section>`;
     }
 

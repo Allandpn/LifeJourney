@@ -82,8 +82,39 @@ export interface Intencao {
   memoria_id: string | null;
 }
 
+export interface Mudanca {
+  fator: string; // ou "todas"
+  acao: string;
+  hr_total: number;
+  ganho_semanas: number;
+  mediana: number;
+}
+
+export interface Pergunta {
+  fator: string;
+  pergunta: string;
+  tipo: "opcoes" | "altura_e_peso";
+  opcoes: { valor: string; rotulo: string }[];
+  fonte: string;
+  muda_com_habito: boolean;
+}
+
+export interface EnvioDeRespostas {
+  respostas: Record<string, string>;
+  altura_m: number | null;
+  peso_kg: number | null;
+}
+
+export interface RodadaDeRespostas extends EnvioDeRespostas {
+  id: string;
+  criado_em: string;
+  resultado: { idade: number; hr_total: number; expectativa_media: number; p10: number; mediana: number; p90: number };
+}
+
 export interface Estimativa {
-  base: string;
+  base: "brasileiro_medio" | "questionario";
+  respondido_em: string | null;
+  e_se: Mudanca[];
   versao_config: string;
   hr_total: number;
   expectativa_media: number;

@@ -6,7 +6,7 @@ O uso principal é no celular. Cada pessoa tem a própria conta, e os dados fica
 
 ## Estado atual
 
-Etapas 0 a 5 do [roteiro](docs/07-roteiro.md) concluídas:
+Etapas 0 a 6 do [roteiro](docs/07-roteiro.md) concluídas:
 
 - o servidor em Python e o aplicativo em TypeScript existem, se conversam e têm testes;
 - o núcleo de cálculo (`servidor/app/nucleo/`) estima a faixa de vida e o "e se?", com a tábua provisória e todos os números em [`servidor/dados/fatores.json`](servidor/dados/fatores.json).
@@ -14,6 +14,7 @@ Etapas 0 a 5 do [roteiro](docs/07-roteiro.md) concluídas:
 - o aplicativo mostra a linha do tempo do protótipo, lendo da API: rolagem com granularidade ano, mês e semana, capítulos, "Hoje", futuro com a faixa estimada e minimapa;
 - pelo aplicativo dá para criar, editar e excluir memórias (com foto e ligação "veio de"), capítulos e intenções;
 - a API grava e devolve memórias, capítulos, intenções e o perfil, num banco SQLite, com cada registro isolado por dono;
+- a tela "Estimativa" mostra a faixa provável e o "e se?", com um questionário de saúde opcional; responder muda o futuro da linha do tempo;
 - cada pessoa tem a sua conta, criada por convite do administrador, com login, troca de senha e lista de aparelhos conectados.
 
 Os números ainda são provisórios: as médias brasileiras são placeholders e a calibração está pendente (ver [Modelo de cálculo](docs/05-modelo-de-calculo.md)).

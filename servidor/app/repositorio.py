@@ -67,6 +67,14 @@ class Repositorio(Generic[T]):
         self.sessao.refresh(registro)
         return registro
 
+    def apagar_de_vez(self, registros: list[T]) -> None:
+        """Remove do banco de verdade (para dados sensíveis). Só aceita registros deste usuário."""
+        for registro in registros:
+            if registro.usuario_id != self.usuario_id:
+                raise NaoEncontrado(registro.id)
+            self.sessao.delete(registro)
+        self.sessao.commit()
+
     def excluir(self, registro: T) -> None:
         registro.excluido_em = agora()
         registro.atualizado_em = registro.excluido_em

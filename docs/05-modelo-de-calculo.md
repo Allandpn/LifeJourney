@@ -119,6 +119,8 @@ Com a tábua provisória, o núcleo reproduz o protótipo descrito no briefing: 
 
 A calibração ainda não bate. Aos 50 anos, o perfil com quatro hábitos saudáveis vive 16,4 anos a mais que o perfil sem nenhum, contra 12 (homens) e 14 (mulheres) em Li et al. O perfil sem hábitos bate no teto de 4,0. O teste `test_calibracao.py` está marcado como falha esperada até isso ser resolvido.
 
+O teto também achata o "e se?" de perfis com muitos fatores de risco: se o risco total passaria de 4,0, tirar um fator pequeno quase não muda o risco já cortado no teto. Num perfil de teste com risco de 4,4 (cortado para 4,0), dormir de 6 a 8 horas rendeu só 9 semanas. A calibração do teto deve levar isso em conta.
+
 Como as médias brasileiras ainda são placeholders, um perfil com alguns fatores de risco pode sair com risco total abaixo de 1,0. Isso é efeito da recentragem sobre médias inventadas, e muda quando as prevalências reais entrarem.
 
 ## Pendências científicas
@@ -137,6 +139,6 @@ Podem andar em paralelo ao código.
 
 - Na linha do tempo, só como forma do futuro: onde a linha fica tracejada e o quanto esmaece.
 - No minimapa, como o esmaecimento das semanas futuras.
-- Na tela do questionário, como a faixa em anos e o ganho em semanas de cada "e se?".
+- Na tela "Estimativa", aberta pelo cartão "Hoje" ("Como o futuro é estimado") ou pelos marcos do futuro: a faixa em anos, a mediana, as semanas até o meio da faixa, o ganho em semanas de cada "e se?" e o histórico. A tela sempre lembra que não é aconselhamento médico e que os números ainda são provisórios.
 
 O cálculo nunca aparece como contagem regressiva.

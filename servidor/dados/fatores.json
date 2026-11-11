@@ -1,7 +1,6 @@
 {
-  "versao": "2026-11-provisoria-1",
+  "versao": "2026-11-provisoria-2",
   "_nota": "Todos os números do modelo ficam aqui. 'status' diz o grau de confiança: 'publicado' (no resumo do artigo), 'aproximado' (derivado ou a conferir no texto completo), 'provisorio' (sem fonte direta, só para testar o sistema). Ver docs/05-modelo-de-calculo.md.",
-
   "parametros": {
     "atenuacao": {
       "inicio": 75,
@@ -24,61 +23,146 @@
     "passos_por_ano": 12,
     "semanas_por_ano": 52.1775
   },
-
   "tabua": {
     "tipo": "gompertz_makeham_provisoria",
     "b": 0.09,
     "c": 0.0006,
-    "expectativa_aos_60": { "masculino": 20.8, "feminino": 24.2 },
+    "expectativa_aos_60": {
+      "masculino": 20.8,
+      "feminino": 24.2
+    },
     "status": "provisorio",
     "fonte": "Curva mu(x) = a·e^(0,09x) + 0,0006, com 'a' ajustado para a expectativa aos 60 da tábua IBGE 2024. Substituir pela tábua real (etapa 9).",
     "_exemplo_tabua_real": {
       "tipo": "csv",
       "arquivo": "tabua-ibge-2024.csv",
-      "extensao_gompertz": { "de": 60, "ate": 80 }
+      "extensao_gompertz": {
+        "de": 60,
+        "ate": 80
+      }
     }
   },
-
   "fatores": {
     "tabagismo": {
       "pergunta": "Você fuma ou já fumou?",
       "bloco": "causal",
       "fonte": "Jha et al., NEJM 2013; Jha, eLife 2020",
       "respostas": {
-        "nunca": { "hr": 1.0, "status": "publicado" },
-        "parou_antes_40": { "hr": 1.1, "status": "aproximado" },
-        "parou_depois_40": { "hr": 1.5, "status": "aproximado" },
-        "fuma": { "hr": 2.8, "status": "aproximado" }
+        "nunca": {
+          "hr": 1.0,
+          "status": "publicado",
+          "rotulo": "nunca fumei"
+        },
+        "parou_antes_40": {
+          "hr": 1.1,
+          "status": "aproximado",
+          "rotulo": "parei antes dos 40"
+        },
+        "parou_depois_40": {
+          "hr": 1.5,
+          "status": "aproximado",
+          "rotulo": "parei depois dos 40"
+        },
+        "fuma": {
+          "hr": 2.8,
+          "status": "aproximado",
+          "rotulo": "fumo"
+        }
       },
-      "media_br": { "valor": 1.275, "status": "provisorio", "fonte": "Placeholder sem fonte. Trocar por prevalências do Vigitel/PNS." },
-      "e_se": { "fuma": "parou_depois_40" },
-      "_nota_e_se": "Conservador: parar agora conta como 'parou depois dos 40' mesmo para quem tem menos de 40."
+      "media_br": {
+        "valor": 1.275,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte. Trocar por prevalências do Vigitel/PNS."
+      },
+      "e_se": {
+        "fuma": "parou_depois_40"
+      },
+      "_nota_e_se": "Conservador: parar agora conta como 'parou depois dos 40' mesmo para quem tem menos de 40.",
+      "acao_e_se": "Parar de fumar"
     },
-
     "imc": {
       "pergunta": "Qual a sua altura e o seu peso?",
       "bloco": "causal",
       "fonte": "Global BMI Mortality Collaboration, Lancet 2016",
       "faixas": [
-        { "abaixo_de": 18.5, "resposta": "abaixo_de_18_5" },
-        { "abaixo_de": 20, "resposta": "18_5_a_20" },
-        { "abaixo_de": 25, "resposta": "20_a_25" },
-        { "abaixo_de": 27.5, "resposta": "25_a_27_5" },
-        { "abaixo_de": 30, "resposta": "27_5_a_30" },
-        { "abaixo_de": 35, "resposta": "30_a_35" },
-        { "abaixo_de": 40, "resposta": "35_a_40", "resposta_acima": "40_ou_mais" }
+        {
+          "abaixo_de": 18.5,
+          "resposta": "abaixo_de_18_5"
+        },
+        {
+          "abaixo_de": 20,
+          "resposta": "18_5_a_20"
+        },
+        {
+          "abaixo_de": 25,
+          "resposta": "20_a_25"
+        },
+        {
+          "abaixo_de": 27.5,
+          "resposta": "25_a_27_5"
+        },
+        {
+          "abaixo_de": 30,
+          "resposta": "27_5_a_30"
+        },
+        {
+          "abaixo_de": 35,
+          "resposta": "30_a_35"
+        },
+        {
+          "abaixo_de": 40,
+          "resposta": "35_a_40",
+          "resposta_acima": "40_ou_mais"
+        }
       ],
       "respostas": {
-        "abaixo_de_18_5": { "hr": 1.51, "status": "aproximado", "nota": "Faixa 15–18,5; não está no briefing, conferir no artigo." },
-        "18_5_a_20": { "hr": 1.13, "status": "publicado" },
-        "20_a_25": { "hr": 1.0, "status": "publicado" },
-        "25_a_27_5": { "hr": 1.07, "status": "publicado" },
-        "27_5_a_30": { "hr": 1.2, "status": "publicado" },
-        "30_a_35": { "hr": 1.45, "status": "aproximado" },
-        "35_a_40": { "hr": 1.94, "status": "aproximado" },
-        "40_ou_mais": { "hr": 2.76, "status": "publicado" }
+        "abaixo_de_18_5": {
+          "hr": 1.51,
+          "status": "aproximado",
+          "nota": "Faixa 15–18,5; não está no briefing, conferir no artigo.",
+          "rotulo": "IMC abaixo de 18,5"
+        },
+        "18_5_a_20": {
+          "hr": 1.13,
+          "status": "publicado",
+          "rotulo": "IMC de 18,5 a 20"
+        },
+        "20_a_25": {
+          "hr": 1.0,
+          "status": "publicado",
+          "rotulo": "IMC de 20 a 25"
+        },
+        "25_a_27_5": {
+          "hr": 1.07,
+          "status": "publicado",
+          "rotulo": "IMC de 25 a 27,5"
+        },
+        "27_5_a_30": {
+          "hr": 1.2,
+          "status": "publicado",
+          "rotulo": "IMC de 27,5 a 30"
+        },
+        "30_a_35": {
+          "hr": 1.45,
+          "status": "aproximado",
+          "rotulo": "IMC de 30 a 35"
+        },
+        "35_a_40": {
+          "hr": 1.94,
+          "status": "aproximado",
+          "rotulo": "IMC de 35 a 40"
+        },
+        "40_ou_mais": {
+          "hr": 2.76,
+          "status": "publicado",
+          "rotulo": "IMC de 40 ou mais"
+        }
       },
-      "media_br": { "valor": 1.2135, "status": "provisorio", "fonte": "Placeholder sem fonte." },
+      "media_br": {
+        "valor": 1.2135,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      },
       "e_se": {
         "abaixo_de_18_5": "20_a_25",
         "18_5_a_20": "20_a_25",
@@ -87,114 +171,288 @@
         "30_a_35": "20_a_25",
         "35_a_40": "20_a_25",
         "40_ou_mais": "20_a_25"
-      }
+      },
+      "acao_e_se": "Chegar a um IMC entre 20 e 25"
     },
-
     "alcool": {
       "pergunta": "Quantas doses de bebida alcoólica você toma por semana? (1 dose ≈ 14 g de álcool)",
       "bloco": "causal",
       "fonte": "Wood et al., Lancet 2018. Publicado em anos de vida perdidos aos 40; convertido em HR pela tábua ativa.",
       "respostas": {
-        "ate_7": { "hr": 1.0, "status": "publicado" },
-        "7_a_14": { "perda_anos": 0.5, "idade_referencia": 40, "status": "publicado" },
-        "14_a_25": { "perda_anos": 1.0, "idade_referencia": 40, "status": "publicado", "nota": "Artigo dá 1 a 2 anos; usado o menor." },
-        "25_ou_mais": { "perda_anos": 4.0, "idade_referencia": 40, "status": "publicado", "nota": "Artigo dá 4 a 5 anos; usado o menor." }
+        "ate_7": {
+          "hr": 1.0,
+          "status": "publicado",
+          "rotulo": "até 7 doses"
+        },
+        "7_a_14": {
+          "perda_anos": 0.5,
+          "idade_referencia": 40,
+          "status": "publicado",
+          "rotulo": "de 7 a 14 doses"
+        },
+        "14_a_25": {
+          "perda_anos": 1.0,
+          "idade_referencia": 40,
+          "status": "publicado",
+          "nota": "Artigo dá 1 a 2 anos; usado o menor.",
+          "rotulo": "de 14 a 25 doses"
+        },
+        "25_ou_mais": {
+          "perda_anos": 4.0,
+          "idade_referencia": 40,
+          "status": "publicado",
+          "nota": "Artigo dá 4 a 5 anos; usado o menor.",
+          "rotulo": "25 doses ou mais"
+        }
       },
-      "media_br": { "valor": 1.0355, "status": "provisorio", "fonte": "Placeholder sem fonte." },
-      "e_se": { "7_a_14": "ate_7", "14_a_25": "ate_7", "25_ou_mais": "ate_7" }
+      "media_br": {
+        "valor": 1.0355,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      },
+      "e_se": {
+        "7_a_14": "ate_7",
+        "14_a_25": "ate_7",
+        "25_ou_mais": "ate_7"
+      },
+      "acao_e_se": "Beber até 7 doses por semana"
     },
-
     "atividade": {
       "pergunta": "Quantos minutos por semana você faz de atividade física moderada ou intensa?",
       "bloco": "marcador",
       "fonte": "Ekelund et al., BMJ 2019 (acelerômetro: 1,00 · 0,48 · 0,34 · 0,27). Valores abaixo bem atenuados para resposta autorreferida.",
       "respostas": {
-        "menos_de_30": { "hr": 1.45, "status": "provisorio" },
-        "30_a_150": { "hr": 1.2, "status": "provisorio" },
-        "150_a_300": { "hr": 1.0, "status": "provisorio" },
-        "mais_de_300": { "hr": 0.95, "status": "provisorio" }
+        "menos_de_30": {
+          "hr": 1.45,
+          "status": "provisorio",
+          "rotulo": "menos de 30 minutos"
+        },
+        "30_a_150": {
+          "hr": 1.2,
+          "status": "provisorio",
+          "rotulo": "de 30 a 150 minutos"
+        },
+        "150_a_300": {
+          "hr": 1.0,
+          "status": "provisorio",
+          "rotulo": "de 150 a 300 minutos"
+        },
+        "mais_de_300": {
+          "hr": 0.95,
+          "status": "provisorio",
+          "rotulo": "mais de 300 minutos"
+        }
       },
-      "media_br": { "valor": 1.2125, "status": "provisorio", "fonte": "Placeholder sem fonte." },
-      "e_se": { "menos_de_30": "150_a_300", "30_a_150": "150_a_300" }
+      "media_br": {
+        "valor": 1.2125,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      },
+      "e_se": {
+        "menos_de_30": "150_a_300",
+        "30_a_150": "150_a_300"
+      },
+      "acao_e_se": "Fazer de 150 a 300 minutos de atividade por semana"
     },
-
     "caminhada": {
       "pergunta": "Seu ritmo normal de caminhada é lento, médio ou rápido?",
       "bloco": "marcador",
       "fonte": "Zaccardi et al., Mayo Clin Proc 2019. Publicado em expectativa de vida; HRs abaixo derivados, não publicados.",
       "respostas": {
-        "rapido": { "hr": 1.0, "status": "provisorio" },
-        "medio": { "hr": 1.35, "status": "provisorio" },
-        "lento": { "hr": 1.9, "status": "provisorio" }
+        "rapido": {
+          "hr": 1.0,
+          "status": "provisorio",
+          "rotulo": "rápido"
+        },
+        "medio": {
+          "hr": 1.35,
+          "status": "provisorio",
+          "rotulo": "médio"
+        },
+        "lento": {
+          "hr": 1.9,
+          "status": "provisorio",
+          "rotulo": "lento"
+        }
       },
-      "media_br": { "valor": 1.228, "status": "provisorio", "fonte": "Placeholder sem fonte." }
+      "media_br": {
+        "valor": 1.228,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      }
     },
-
     "saude": {
       "pergunta": "Como você avalia a sua saúde em geral?",
       "bloco": "marcador",
       "fonte": "DeSalvo et al., JGIM 2006",
       "respostas": {
-        "excelente": { "hr": 1.0, "status": "publicado" },
-        "muito_boa": { "hr": 1.1, "status": "provisorio", "nota": "Interpolado entre excelente e boa." },
-        "boa": { "hr": 1.23, "status": "publicado" },
-        "regular": { "hr": 1.44, "status": "publicado" },
-        "ruim": { "hr": 1.92, "status": "publicado" }
+        "excelente": {
+          "hr": 1.0,
+          "status": "publicado",
+          "rotulo": "excelente"
+        },
+        "muito_boa": {
+          "hr": 1.1,
+          "status": "provisorio",
+          "nota": "Interpolado entre excelente e boa.",
+          "rotulo": "muito boa"
+        },
+        "boa": {
+          "hr": 1.23,
+          "status": "publicado",
+          "rotulo": "boa"
+        },
+        "regular": {
+          "hr": 1.44,
+          "status": "publicado",
+          "rotulo": "regular"
+        },
+        "ruim": {
+          "hr": 1.92,
+          "status": "publicado",
+          "rotulo": "ruim"
+        }
       },
-      "media_br": { "valor": 1.295, "status": "provisorio", "fonte": "Placeholder sem fonte." }
+      "media_br": {
+        "valor": 1.295,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      }
     },
-
     "sono": {
       "pergunta": "Quantas horas você dorme por noite, em média?",
       "bloco": "causal",
       "fonte": "Cappuccio et al., Sleep 2010",
       "respostas": {
-        "menos_de_6": { "hr": 1.12, "status": "publicado" },
-        "6_a_8": { "hr": 1.0, "status": "publicado" },
-        "9_ou_mais": { "hr": 1.3, "status": "publicado", "nota": "Sono longo é marcador, não causa: sem 'e se'." }
+        "menos_de_6": {
+          "hr": 1.12,
+          "status": "publicado",
+          "rotulo": "menos de 6 horas"
+        },
+        "6_a_8": {
+          "hr": 1.0,
+          "status": "publicado",
+          "rotulo": "de 6 a 8 horas"
+        },
+        "9_ou_mais": {
+          "hr": 1.3,
+          "status": "publicado",
+          "nota": "Sono longo é marcador, não causa: sem 'e se'.",
+          "rotulo": "9 horas ou mais"
+        }
       },
-      "media_br": { "valor": 1.054, "status": "provisorio", "fonte": "Placeholder sem fonte." },
-      "e_se": { "menos_de_6": "6_a_8" }
+      "media_br": {
+        "valor": 1.054,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      },
+      "e_se": {
+        "menos_de_6": "6_a_8"
+      },
+      "acao_e_se": "Dormir de 6 a 8 horas"
     },
-
     "diabetes": {
       "pergunta": "Você tem diabetes tipo 2? Com que idade recebeu o diagnóstico?",
       "bloco": "causal",
       "fonte": "Emerging Risk Factors Collaboration, Lancet Diabetes Endocrinol 2023",
       "respostas": {
-        "nao": { "hr": 1.0, "status": "publicado" },
-        "diagnostico_antes_40": { "hr": 2.69, "status": "publicado", "nota": "Artigo dá 30–39; usado também abaixo de 30." },
-        "diagnostico_40_49": { "hr": 2.26, "status": "publicado" },
-        "diagnostico_50_59": { "hr": 1.84, "status": "publicado" },
-        "diagnostico_60_69": { "hr": 1.57, "status": "publicado" },
-        "diagnostico_70_ou_mais": { "hr": 1.39, "status": "publicado" }
+        "nao": {
+          "hr": 1.0,
+          "status": "publicado",
+          "rotulo": "não tenho"
+        },
+        "diagnostico_antes_40": {
+          "hr": 2.69,
+          "status": "publicado",
+          "nota": "Artigo dá 30–39; usado também abaixo de 30.",
+          "rotulo": "sim, diagnóstico antes dos 40"
+        },
+        "diagnostico_40_49": {
+          "hr": 2.26,
+          "status": "publicado",
+          "rotulo": "sim, diagnóstico entre 40 e 49"
+        },
+        "diagnostico_50_59": {
+          "hr": 1.84,
+          "status": "publicado",
+          "rotulo": "sim, diagnóstico entre 50 e 59"
+        },
+        "diagnostico_60_69": {
+          "hr": 1.57,
+          "status": "publicado",
+          "rotulo": "sim, diagnóstico entre 60 e 69"
+        },
+        "diagnostico_70_ou_mais": {
+          "hr": 1.39,
+          "status": "publicado",
+          "rotulo": "sim, diagnóstico aos 70 ou depois"
+        }
       },
-      "media_br": { "valor": 1.03, "status": "provisorio", "fonte": "Placeholder sem fonte." }
+      "media_br": {
+        "valor": 1.03,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      }
     },
-
     "vinculos": {
       "pergunta": "Com quantas pessoas você pode contar de verdade?",
       "bloco": "causal",
       "fonte": "Holt-Lunstad et al., PLoS Med 2010 (OR 1,50 para vínculos fracos; provavelmente superestima como HR)",
       "respostas": {
-        "nenhuma": { "hr": 1.5, "status": "aproximado" },
-        "1_a_2": { "hr": 1.25, "status": "provisorio", "nota": "Interpolado." },
-        "3_a_5": { "hr": 1.0, "status": "aproximado" },
-        "6_ou_mais": { "hr": 1.0, "status": "aproximado" }
+        "nenhuma": {
+          "hr": 1.5,
+          "status": "aproximado",
+          "rotulo": "nenhuma"
+        },
+        "1_a_2": {
+          "hr": 1.25,
+          "status": "provisorio",
+          "nota": "Interpolado.",
+          "rotulo": "1 ou 2"
+        },
+        "3_a_5": {
+          "hr": 1.0,
+          "status": "aproximado",
+          "rotulo": "de 3 a 5"
+        },
+        "6_ou_mais": {
+          "hr": 1.0,
+          "status": "aproximado",
+          "rotulo": "6 ou mais"
+        }
       },
-      "media_br": { "valor": 1.094, "status": "provisorio", "fonte": "Placeholder sem fonte." },
-      "e_se": { "nenhuma": "3_a_5", "1_a_2": "3_a_5" }
+      "media_br": {
+        "valor": 1.094,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      },
+      "e_se": {
+        "nenhuma": "3_a_5",
+        "1_a_2": "3_a_5"
+      },
+      "acao_e_se": "Ter de 3 a 5 pessoas com quem contar"
     },
-
     "depressao": {
       "pergunta": "Você tem depressão diagnosticada atualmente?",
       "bloco": "causal",
       "fonte": "Cuijpers et al., Am J Psychiatry 2014 (1,52 corrigido por viés de publicação; 1,64 sem correção)",
       "respostas": {
-        "nao": { "hr": 1.0, "status": "publicado" },
-        "sim": { "hr": 1.52, "status": "publicado" }
+        "nao": {
+          "hr": 1.0,
+          "status": "publicado",
+          "rotulo": "não"
+        },
+        "sim": {
+          "hr": 1.52,
+          "status": "publicado",
+          "rotulo": "sim"
+        }
       },
-      "media_br": { "valor": 1.052, "status": "provisorio", "fonte": "Placeholder sem fonte." }
+      "media_br": {
+        "valor": 1.052,
+        "status": "provisorio",
+        "fonte": "Placeholder sem fonte."
+      }
     }
   }
 }

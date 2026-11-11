@@ -111,7 +111,11 @@ A implementação está em `servidor/app/modelos.py` (tabelas) e `servidor/app/e
 | `GET` / `PATCH` / `DELETE /api/memorias/{id}` | Lê, altera só os campos enviados, exclui |
 | `PUT` / `GET` / `DELETE /api/memorias/{id}/foto` | Envia (ou troca), mostra e remove a foto; só o dono acessa |
 | `/api/capitulos` e `/api/intencoes` | As mesmas cinco operações |
-| `GET /api/estimativa` | Faixa estimada para o perfil (média brasileira até o questionário existir), com a curva de sobrevivência ano a ano |
+| `GET /api/questionario` | As perguntas, com as opções, os rótulos e a fonte de cada uma |
+| `POST /api/questionario/respostas` | Guarda uma rodada de respostas e devolve a faixa nova |
+| `GET /api/questionario/respostas` | Rodadas anteriores, da mais nova para a mais antiga |
+| `DELETE /api/questionario/respostas` | Apaga de verdade todas as respostas de saúde da conta |
+| `GET /api/estimativa` | Faixa para hoje (com as últimas respostas, ou a média brasileira), curva de sobrevivência ano a ano e "e se?" |
 
 Regras que a API garante:
 
@@ -128,10 +132,13 @@ Cada vez que o usuário responde, guarda-se um registro novo. O histórico permi
 
 | Campo | Tipo | Observação |
 |---|---|---|
-| `data` | data | Quando respondeu |
-| `respostas` | fator → resposta | Pergunta pulada fica ausente e conta como a média brasileira |
+| `data` | data | Quando respondeu (`criado_em`) |
+| `respostas` | fator → resposta | Pergunta pulada fica ausente e conta como a média brasileira. O IMC fica guardado já em faixa |
+| `altura_m`, `peso_kg` | números | Opcionais; servem para calcular a faixa de IMC e para preencher o questionário da próxima vez |
 | `versaoConfig` | texto | Versão do arquivo de fatores usada no cálculo |
 | `resultado` | percentis 10, 50, 90 e risco total | Guardado para comparação histórica |
+
+Por serem dados de saúde, as respostas são apagadas de verdade quando a pessoa pede, e não só marcadas como excluídas. A estimativa é sempre recalculada para a idade de hoje, com a rodada mais recente; respostas que deixaram de existir numa versão nova da configuração são ignoradas.
 
 ## Backup
 

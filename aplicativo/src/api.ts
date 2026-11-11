@@ -1,8 +1,8 @@
 // Conversa com o servidor. Todas as chamadas passam por aqui.
 
 import type {
-  Capitulo, CapituloDados, Conta, Convite, Estimativa, Intencao, IntencaoDados, LinkGerado, Memoria, MemoriaDados,
-  Perfil, SessaoConectada, Sexo,
+  Capitulo, CapituloDados, Conta, Convite, EnvioDeRespostas, Estimativa, Intencao, IntencaoDados, LinkGerado, Memoria,
+  MemoriaDados, Perfil, Pergunta, RodadaDeRespostas, SessaoConectada, Sexo,
 } from "./tipos";
 
 export class ErroDaApi extends Error {
@@ -92,6 +92,12 @@ export const api = {
   perfil: () => pedir<Perfil>("/api/perfil"),
   salvarPerfil: (nascimento: string, sexo: Sexo) => pedir<Perfil>("/api/perfil", json("PUT", { nascimento, sexo })),
   estimativa: () => pedir<Estimativa>("/api/estimativa"),
+  questionario: {
+    perguntas: () => pedir<Pergunta[]>("/api/questionario"),
+    responder: (envio: EnvioDeRespostas) => pedir<Estimativa>("/api/questionario/respostas", json("POST", envio)),
+    historico: () => pedir<RodadaDeRespostas[]>("/api/questionario/respostas"),
+    apagar: () => pedir<void>("/api/questionario/respostas", { method: "DELETE" }),
+  },
 
   memorias: {
     ...crud<Memoria, MemoriaDados>("/api/memorias"),
