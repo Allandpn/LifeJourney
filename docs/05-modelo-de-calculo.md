@@ -138,7 +138,22 @@ O ganho de cada "e se?" é a diferença na expectativa média, convertida em sem
 
 Com a tábua provisória, o núcleo reproduz o protótipo descrito no briefing: diferenças de até 0,1 ano nos percentis e de 1 semana nos ganhos do "e se?".
 
-Com a tábua real e as médias do Vigitel, a calibração bate para as mulheres e ainda não para os homens. Aos 50 anos, o perfil com quatro hábitos saudáveis vive 15,1 anos (mulheres) e 16,7 anos (homens) a mais que o perfil sem nenhum, contra 14 e 12 em Li et al. O perfil sem hábitos bate no teto de 4,0. O caso dos homens está marcado como falha esperada em `test_calibracao.py`.
+### Calibração
+
+A comparação com Li et al. (2018) usa a **razão de risco**, e não os anos de vida: os anos dependem da mortalidade de base (o estudo usa a dos Estados Unidos), e a razão é o que o modelo controla. No estudo, quem tem os 5 hábitos tem risco 0,26 vezes o de quem não tem nenhum (IC 95%: 0,22–0,31).
+
+O perfil "sem hábitos" é o típico do grupo do estudo, que reúne quem falha em cada critério, e não o pior caso. No questionário, isso vira fumante, IMC de 27,5 a 30, de 30 a 150 minutos de atividade e até 7 doses por semana.
+
+| Perfil "sem hábitos" | Razão de risco | Anos a mais aos 50 (homens / mulheres) |
+|---|---|---|
+| Extremo (fumante, obeso, inativo, bebe muito) | 0,15 | 16,7 / 15,1 |
+| Típico, fumante (usado no teste) | 0,27 | 11,0 / 9,4 |
+| Típico, ex-fumante | 0,51 | 5,2 / 4,2 |
+| Li et al. (5 hábitos, com dieta) | 0,26 | 12,2 / 14,0 |
+
+O questionário não tem dieta e não dá benefício ao álcool moderado, então a razão esperada fica um pouco acima de 0,26. O teste aceita de 0,22 a 0,40, e o modelo dá 0,27 nos dois sexos: redutor, teto e piso ficaram como estavam. O perfil extremo bate no teto de 4,0 e serve só para conferir que o teto funciona.
+
+O limite desta calibração: o grupo do estudo mistura fumantes e ex-fumantes, e a razão do modelo vai de 0,27 (só fumantes) a 0,51 (só ex-fumantes). A proporção está no texto completo do artigo, que não foi possível acessar.
 
 O teto também achata o "e se?" de perfis com muitos fatores de risco: se o risco total passaria de 4,0, tirar um fator pequeno quase não muda o risco já cortado no teto. Num perfil de teste com risco de 4,4 (cortado para 4,0), dormir de 6 a 8 horas rendeu só 9 semanas. A calibração do teto deve levar isso em conta.
 
@@ -173,7 +188,8 @@ Podem andar em paralelo ao código.
 - [ ] Prevalências de álcool (doses por semana), ritmo de caminhada e vínculos sociais: sem dado brasileiro na escala das perguntas; seguem provisórias.
 - [ ] Prevalências por sexo (o Vigitel tem; o modelo hoje usa uma média para os dois sexos).
 - [ ] Escolher a forma final da atenuação depois dos 75 anos.
-- [ ] Calibrar redutor, teto e piso contra Li et al. (2018): perfil com cinco hábitos saudáveis contra nenhum, aos 50 anos, deve dar perto de 12 anos de diferença (homens) e 14 (mulheres).
+- [x] Calibrar contra Li et al. (2018), pela razão de risco (ver "Calibração" abaixo). Redutor, teto e piso ficaram como estavam.
+- [ ] Refazer a calibração com o texto completo de Li et al., que traz a proporção de fumantes e ex-fumantes no grupo sem hábitos.
 
 ## Como o cálculo aparece na interface
 
