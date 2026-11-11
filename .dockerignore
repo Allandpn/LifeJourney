@@ -1,0 +1,12 @@
+# o que não entra na imagem
+.git
+.env
+dados-pessoais
+**/node_modules
+**/.venv
+**/dist
+**/__pycache__
+**/.pytest_cache
+**/*.egg-info
+prototipo
+docs

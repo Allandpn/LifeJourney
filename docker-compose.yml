@@ -1,0 +1,49 @@
+# Vida em Semanas no Raspberry Pi. Passo a passo em docs/09-publicacao.md.
+#
+#   docker compose up -d --build      liga (ou atualiza depois de um git pull)
+#   docker compose logs -f app        mostra o que o servidor está fazendo
+#
+# Nenhuma porta é aberta no Pi: o acesso de fora chega só pelo túnel da Cloudflare.
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # fixos aqui para o .env não conseguir mudar: modo produção e os caminhos dentro do contêiner
+      LJ_MODO: producao
+      LJ_BANCO: /dados/lifejourney.db
+      LJ_FOTOS: /dados/fotos
+      LJ_COPIAS: /copias
+      LJ_APLICATIVO: /servico/aplicativo
+      # o túnel informa o endereço real de quem acessa neste cabeçalho
+      LJ_CABECALHO_DO_IP: CF-Connecting-IP
+    # create_host_path: false faz o serviço NÃO ligar se a pasta não existir. Assim, se o
+    # SSD cifrado ainda não foi aberto depois de um reinício, o servidor não cria um banco
+    # novo e vazio no cartão SD: ele espera até o disco estar montado.
+    volumes:
+      - type: bind
+        source: ${LJ_PASTA_DADOS:-./dados-pessoais/producao}
+        target: /dados
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${LJ_PASTA_COPIAS:-./dados-pessoais/copias}
+        target: /copias
+        bind: { create_host_path: false }
+    networks: [interna]
+    # para testar direto no Pi (http://127.0.0.1:8080), tire o # da linha abaixo.
+    # O login não funciona por esse caminho em produção (o cookie exige HTTPS).
+    # ports: ["127.0.0.1:8080:8000"]
+
+  tunel:
+    image: cloudflare/cloudflared:2025.8.1
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?defina CLOUDFLARE_TUNNEL_TOKEN no .env}
+    depends_on: [app]
+    networks: [interna]
+
+networks:
+  interna:

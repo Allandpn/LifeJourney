@@ -55,9 +55,11 @@ O servidor roda em um Raspberry Pi 4 ligado 24 horas, junto com outros projetos 
 | Docker Compose | Empacota o servidor em um contêiner | Isola este projeto dos outros que rodam no mesmo Pi e facilita atualizar |
 | Cloudflare Tunnel | Liga o Pi à internet sem abrir portas no roteador | HTTPS automático e o endereço de casa não fica exposto. Exige um domínio próprio |
 | Banco e fotos em SSD externo | Em vez do cartão SD | Cartões SD falham com gravação constante |
-| Cópia de segurança noturna, cifrada | Banco e fotos copiados para outro local | O Pi é um ponto único de falha; sem cópia, um defeito apaga tudo de todos |
+| Cópia de segurança noturna, cifrada com `age` | Banco e fotos copiados para outro disco (e, se quiser, para a nuvem) | O Pi é um ponto único de falha. A cópia usa uma chave pública: o Pi cria cópias, mas só a chave privada, guardada fora dele, as abre |
 
-Durante o desenvolvimento, tudo roda no próprio computador. O Pi só entra na etapa de publicação.
+Durante o desenvolvimento, tudo roda no próprio computador. O Pi só entra na etapa de publicação ([passo a passo](09-publicacao.md)).
+
+Na imagem Docker, o aplicativo compilado é servido pelo próprio servidor Python, no mesmo endereço da API. O contêiner roda sem ser root, cria arquivos legíveis só pelo dono e se recusa a ligar se a pasta de dados não estiver montada.
 
 O Raspberry Pi 4 dá conta com folga: o cálculo é leve e o número de usuários é pequeno.
 
@@ -163,11 +165,11 @@ Na v1 isso é tratado com transparência: a tela de criação de conta avisa que
 
 | Limite | Consequência | Quando resolver |
 |---|---|---|
-| Atrás do túnel da Cloudflare, todo pedido parece vir do próprio Pi | O limite de 20 tentativas por endereço vira um limite único para todos | Etapa 7: usar o endereço real que a Cloudflare informa |
+| Atrás do túnel da Cloudflare, todo pedido parece vir do próprio Pi | O limite de 20 tentativas por endereço viraria um limite único para todos | Resolvido na etapa 7: o servidor lê o endereço real no cabeçalho `CF-Connecting-IP`, e só o túnel alcança o contêiner |
 | O limite por conta pode ser usado para bloquear alguém | Errar a senha de outra pessoa 5 vezes impede que ela entre por 15 minutos | Aceito: é melhor que permitir adivinhação |
 | As contagens de tentativas ficam na memória do servidor | Reiniciar o servidor zera as contagens | Aceito para um servidor de um processo só |
-| Sessões vencidas continuam no banco | Ocupam espaço; não dão acesso | Limpeza periódica na etapa 7 |
-| A página do aplicativo ainda não tem cabeçalhos de segurança (CSP) | Hoje é servida pelo Vite, só em desenvolvimento | Etapa 7, quando o servidor passar a servir a página |
+| Sessões vencidas continuavam no banco | Ocupavam espaço; não davam acesso | Resolvido na etapa 7: são apagadas a cada login |
+| A página do aplicativo não tinha cabeçalhos de segurança | Era servida pelo Vite, só em desenvolvimento | Resolvido na etapa 7: o servidor entrega a página com política de conteúdo (CSP), HSTS e proibição de ser exibida dentro de outros sites |
 
 ### Dados em repouso e em trânsito
 

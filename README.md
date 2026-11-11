@@ -6,7 +6,7 @@ O uso principal é no celular. Cada pessoa tem a própria conta, e os dados fica
 
 ## Estado atual
 
-Etapas 0 a 6 do [roteiro](docs/07-roteiro.md) concluídas:
+Etapas 0 a 6 do [roteiro](docs/07-roteiro.md) concluídas, e a etapa 7 pronta para instalar no Raspberry Pi ([passo a passo](docs/09-publicacao.md)):
 
 - o servidor em Python e o aplicativo em TypeScript existem, se conversam e têm testes;
 - o núcleo de cálculo (`servidor/app/nucleo/`) estima a faixa de vida e o "e se?", com a tábua provisória e todos os números em [`servidor/dados/fatores.json`](servidor/dados/fatores.json).
@@ -15,6 +15,7 @@ Etapas 0 a 6 do [roteiro](docs/07-roteiro.md) concluídas:
 - pelo aplicativo dá para criar, editar e excluir memórias (com foto e ligação "veio de"), capítulos e intenções;
 - a API grava e devolve memórias, capítulos, intenções e o perfil, num banco SQLite, com cada registro isolado por dono;
 - a tela "Estimativa" mostra a faixa provável e o "e se?", com um questionário de saúde opcional; responder muda o futuro da linha do tempo;
+- uma imagem Docker reúne o aplicativo e o servidor, com túnel da Cloudflare, cópias de segurança cifradas e o aplicativo instalável no celular;
 - cada pessoa tem a sua conta, criada por convite do administrador, com login, troca de senha e lista de aparelhos conectados.
 
 Os números ainda são provisórios: as médias brasileiras são placeholders e a calibração está pendente (ver [Modelo de cálculo](docs/05-modelo-de-calculo.md)).
@@ -94,7 +95,11 @@ Com o servidor ligado, a página mostra "Servidor no ar".
 
 Para experimentar a API, abra http://127.0.0.1:8000/docs com o servidor ligado: entre primeiro pela rota `POST /api/entrar`, e o navegador guarda o cookie para as outras. Em modo produção essa página não existe. O banco fica em `dados-pessoais/lifejourney.db` e as fotos em `dados-pessoais/fotos/`; para recomeçar do zero, apague os dois.
 
-Enquanto não houver ferramenta de migração (antes da etapa 7), quando uma etapa muda as tabelas é preciso apagar o banco de desenvolvimento e rodar `python -m app.exemplo` de novo. A etapa 4 mudou a tabela de memórias. Para ver no celular, conecte-o à mesma rede Wi-Fi e abra o endereço "Network" que o `npm run dev` mostra.
+As mudanças no banco são aplicadas sozinhas quando o servidor liga (migrações com Alembic). Quem muda uma tabela em `servidor/app/modelos.py` cria a migração, dentro de `servidor`, com:
+
+```powershell
+.venv\Scripts\alembic revision --autogenerate -m "o que mudou"
+``` Para ver no celular, conecte-o à mesma rede Wi-Fi e abra o endereço "Network" que o `npm run dev` mostra.
 
 ### No IntelliJ
 
@@ -126,6 +131,7 @@ Enquanto não houver ferramenta de migração (antes da etapa 7), quando uma eta
 | [Arquitetura](docs/06-arquitetura.md) | Tecnologias, pastas e módulos, com o porquê de cada escolha |
 | [Roteiro](docs/07-roteiro.md) | Etapas de construção |
 | [Decisões](docs/08-decisoes.md) | O que já foi decidido, o que está proposto e o que está em aberto |
+| [Publicação](docs/09-publicacao.md) | Passo a passo para colocar no ar no Raspberry Pi |
 
 ## Privacidade
 

@@ -13,7 +13,7 @@ from datetime import date, timedelta
 
 from sqlmodel import Session, select
 
-from app.banco import criar_tabelas, obter_motor
+from app.banco import obter_motor, preparar_banco
 from app.config import obter_configuracao
 from app.modelos import Capitulo, Intencao, Memoria, Usuario, agora
 from app.repositorio import Repositorio
@@ -135,7 +135,7 @@ def main(argumentos: list[str]) -> int:
         print("Os dados de exemplo só podem ser criados em modo desenvolvimento.")
         return 1
     motor = obter_motor()
-    criar_tabelas(motor)
+    preparar_banco(motor)
     with Session(motor) as sessao:
         usuario = sessao.exec(select(Usuario).where(Usuario.email == config.email_desenvolvimento)).first()
         if usuario is None:

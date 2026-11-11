@@ -36,16 +36,19 @@ Registro curto do que foi decidido e do que falta decidir. Decisões tomadas nã
 | Excluir pede um segundo toque, sem janela de confirmação | Evita exclusão por engano sem interromper |
 | Alembic para mudanças no banco, antes da etapa 7 | Até lá, mudar uma tabela é apagar o banco de desenvolvimento |
 
+| Docker Compose no Raspberry Pi, sem portas abertas | Isola dos outros projetos do Pi; acesso só pelo túnel |
+| Cloudflare Tunnel para acesso externo | HTTPS automático sem abrir o roteador; Tailscale documentado como alternativa, sem teste |
+| Cópias cifradas com chave pública (`age`), chave privada fora do Pi | Quem levar o Pi ou o disco de cópias não lê nada |
+| Migrações do banco com Alembic, aplicadas ao ligar | Mudanças nas tabelas sem perder dados reais |
+| Sem modo sem conexão na v1 | Não deixar memórias e respostas de saúde guardadas num celular que pode ser perdido |
+
 ## Propostas, aguardando confirmação
 
 | Proposta | Alternativa |
 |---|---|
 | Servidor com FastAPI, SQLModel e SQLite | Serviço pronto de login e banco (por exemplo Supabase), com Python só no cálculo |
 | Aplicativo web instalável (PWA) em TypeScript, sem framework | Aplicativo nativo para Android |
-| Sincronização direta na v1: precisa de internet para registrar | Registrar sem conexão e enviar depois (mais complexo) |
-| Docker Compose no Raspberry Pi | Rodar direto no sistema, como serviço |
-| Cloudflare Tunnel para acesso externo, com domínio próprio | Abrir porta no roteador com Caddy e DNS dinâmico; ou Tailscale, só para aparelhos autorizados |
-| Banco e fotos em SSD externo cifrado, com cópia noturna cifrada para fora do Pi | Cartão SD, sem cópia |
+| Banco e fotos em SSD externo cifrado com LUKS | Cartão SD sem cifra |
 | Na v1, o administrador pode tecnicamente abrir o banco; a tela de cadastro avisa | Cifrar os dados com a senha de cada usuário (v2) |
 | O passado é o centro; a estimativa só dá forma ao futuro | Estimativa em destaque na tela principal |
 | Emoção e intensidade entram na v1 | Deixar para depois |
@@ -57,10 +60,9 @@ Registro curto do que foi decidido e do que falta decidir. Decisões tomadas nã
 
 | Pergunta | Impacto |
 |---|---|
-| Como os outros projetos rodam no Pi hoje (Docker, serviços)? | Define como este se encaixa sem conflito de portas |
-| Já existe um domínio próprio? | Necessário para o Cloudflare Tunnel |
-| Para onde vai a cópia de segurança? | Outro disco em casa ou armazenamento em nuvem |
-| Por quanto tempo as cópias de segurança são mantidas? | Prazo para os dados de uma conta apagada sumirem de vez |
+| Já existe um domínio próprio? | Sem ele, usar a alternativa do Tailscale (docs/09-publicacao.md) |
+| Para onde vai a cópia de segurança? | Pasta configurável (`LJ_PASTA_COPIAS`); pode ser outro disco e, por estar cifrada, também a nuvem |
+| Por quanto tempo as cópias de segurança são mantidas? | Hoje, as 30 mais recentes (`LJ_COPIA_MANTER`). Define o prazo para os dados de uma conta apagada sumirem de vez |
 | Limite de 280 caracteres por memória é suficiente? | Modelo de dados e layout dos cartões |
 | Como o usuário escolhe "veio de" ao criar uma memória? | Desenho da tela de edição |
 | O grid do minimapa vai até que idade? | Hoje vai um pouco além do percentil 90 |

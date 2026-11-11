@@ -25,6 +25,8 @@ class Configuracao:
     caminho_banco: Path
     pasta_fotos: Path
     email_desenvolvimento: str  # conta criada por "python -m app.exemplo"
+    cabecalho_do_ip: str | None = None  # ex.: "CF-Connecting-IP", atrás do túnel da Cloudflare
+    pasta_do_aplicativo: Path | None = None  # aplicativo compilado (npm run build), servido em "/"
 
     @property
     def desenvolvimento(self) -> bool:
@@ -44,4 +46,6 @@ def obter_configuracao() -> Configuracao:
         caminho_banco=Path(banco) if banco else BANCO_PADRAO,
         pasta_fotos=Path(fotos) if fotos else FOTOS_PADRAO,
         email_desenvolvimento=os.environ.get("LJ_EMAIL_DESENVOLVIMENTO", "dev@exemplo.local"),
+        cabecalho_do_ip=os.environ.get("LJ_CABECALHO_DO_IP") or None,
+        pasta_do_aplicativo=Path(os.environ["LJ_APLICATIVO"]) if os.environ.get("LJ_APLICATIVO") else None,
     )

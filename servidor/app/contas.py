@@ -14,7 +14,7 @@ import sys
 
 from sqlmodel import Session, select
 
-from app.banco import criar_tabelas, obter_motor
+from app.banco import obter_motor, preparar_banco
 from app.modelos import Sessao, Usuario
 from app.seguranca import SENHA_MINIMA, hash_da_senha
 
@@ -37,7 +37,7 @@ def main(argumentos: list[str]) -> int:
         print("E-mail inválido.")
         return 1
     motor = obter_motor()
-    criar_tabelas(motor)
+    preparar_banco(motor)
     with Session(motor) as sessao:
         usuario = sessao.exec(select(Usuario).where(Usuario.email == email)).first()
         if comando == "criar-admin":

@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Request, Response, status
 from sqlmodel import select
 
 from app.api.dependencias import NOME_DO_COOKIE, ConfigDep, SessaoAtualDep, SessaoDep, UsuarioDep
+from app.config import obter_configuracao
 from app.esquemas import ContaLida, Entrada, NovaConta, SenhaRedefinida, SessaoLida, TrocaDeSenha
 from app.modelos import Convite, Redefinicao, Sessao, Usuario, agora, em_utc
 from app.seguranca import Limitador, hash_da_senha, hash_do_codigo, novo_codigo, senha_confere
@@ -23,10 +24,22 @@ tentativas_de_codigo = Limitador(20, 15 * 60)
 
 
 def _endereco(request: Request) -> str:
+    """Endereço de quem fez o pedido, para o limite de tentativas.
+
+    Atrás do túnel da Cloudflare, todo pedido chega vindo do túnel; o endereço real
+    vem num cabeçalho (LJ_CABECALHO_DO_IP). Só ligue essa opção se o servidor não for
+    alcançável por outro caminho, porque qualquer um poderia inventar o cabeçalho.
+    """
+    cabecalho = obter_configuracao().cabecalho_do_ip
+    if cabecalho and request.headers.get(cabecalho):
+        return request.headers[cabecalho].strip()[:64]
     return request.client.host if request.client else "desconhecido"
 
 
 def _abrir_sessao(resposta: Response, request: Request, sessao: SessaoDep, usuario: Usuario, seguro: bool) -> None:
+    # aproveita para apagar as sessões vencidas de todo mundo
+    for vencida in sessao.exec(select(Sessao).where(Sessao.expira_em < agora())):
+        sessao.delete(vencida)
     codigo = novo_codigo()
     sessao.add(Sessao(
         codigo_hash=hash_do_codigo(codigo), usuario_id=usuario.id,

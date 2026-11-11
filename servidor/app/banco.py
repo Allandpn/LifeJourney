@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from pathlib import Path
 
-from sqlalchemy import event
+from sqlalchemy import event, inspect
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -35,9 +36,33 @@ def obter_motor() -> Engine:
     return _motor
 
 
+PASTA_DO_SERVIDOR = Path(__file__).resolve().parents[1]
+
+
 def criar_tabelas(motor: Engine) -> None:
-    """Cria as tabelas que ainda não existem. Não altera tabelas já existentes."""
+    """Cria as tabelas direto dos modelos, sem migrações. Usado nos testes."""
     SQLModel.metadata.create_all(motor)
+
+
+def preparar_banco(motor: Engine) -> None:
+    """Deixa o banco com a estrutura mais recente, aplicando as migrações que faltam.
+
+    Um banco criado antes de existirem migrações (só em desenvolvimento) é marcado
+    como estando na versão atual.
+    """
+    from alembic import command
+    from alembic.config import Config
+
+    config = Config(str(PASTA_DO_SERVIDOR / "alembic.ini"))
+    config.set_main_option("script_location", str(PASTA_DO_SERVIDOR / "migracoes"))
+    config.set_main_option("version_locations", str(PASTA_DO_SERVIDOR / "migracoes" / "versoes"))
+    tabelas = set(inspect(motor).get_table_names())
+    with motor.begin() as conexao:
+        config.attributes["conexao"] = conexao
+        if tabelas and "alembic_version" not in tabelas:
+            command.stamp(config, "head")
+        else:
+            command.upgrade(config, "head")
 
 
 def obter_sessao() -> Iterator[Session]:
