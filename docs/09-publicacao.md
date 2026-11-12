@@ -22,6 +22,7 @@ O acesso é pelo Tailscale, com um nó só do projeto (`https://vida-em-semanas.
    ```
 3. **Chave de autenticação** (painel > Settings > Keys): pré-autorizada, uso único, **não** efêmera, com `tag:semanas`.
 4. **Endereço da tailnet:** o fim do endereço dos seus aparelhos (ex.: `tail1234.ts.net`), em painel > DNS.
+   Na mesma página, **MagicDNS** e **HTTPS Certificates** precisam estar ligados (o nó usa um certificado `*.ts.net`).
 
 ### Instalar
 
